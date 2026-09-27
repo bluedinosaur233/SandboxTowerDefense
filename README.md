@@ -80,9 +80,3 @@ npm run test:browser  # Chrome 真实浏览器试玩，先启动开发服务器
 - `docs/art/mountain-map-reference.png`、`docs/art/canyon-map-reference.png`：新增地图的概念设定参考图；它们用于确定色彩、构图和地形识别，实际运行时仍使用 Three.js 程序化体素绘制。
 
 体素模型和地形工具图标为程序化几何，四类建筑按钮使用本地打包的生成插画，来源与裁切记录见 [美术说明](docs/art/README.md)。运行时不依赖远程美术素材，也不请求外部字体。当前尚无存档、科技树或联网功能；重启/刷新会重置当前地图战役。
-
-## 本机 Chrome 自动化启动问题（2026-09-24）
-
-本次两份 macOS 崩溃报告都在 `HIServices._RegisterApplication` / `TransformProcessType` 处触发 `SIGABRT`，发生在页面加载之前。同版本 Chrome 153.0.8010.49 在经授权的沙箱外启动通过，并能运行本游戏。这支持将本次问题定位到受限启动环境，而非游戏 JavaScript。
-
-在此类受限环境中，应通过允许的浏览器连接方式，或经授权的浏览器测试进程执行测试。无需为了本项目关闭系统安全保护、删除日常 Chrome 用户资料或反复重装浏览器。
