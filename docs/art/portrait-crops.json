@@ -1,0 +1,30 @@
+{
+  "source": "riverwatch-ui-reference.png",
+  "format": "x,y,width,height",
+  "crops": {
+    "archer": [
+      252,
+      791,
+      106,
+      106
+    ],
+    "mage": [
+      374,
+      791,
+      106,
+      106
+    ],
+    "barracks": [
+      498,
+      791,
+      106,
+      106
+    ],
+    "wall": [
+      620,
+      791,
+      106,
+      106
+    ]
+  }
+}

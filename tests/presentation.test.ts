@@ -39,3 +39,27 @@ test('music credits identify locally bundled CC BY 4.0 licensed recordings',()=>
   assert.deepEqual(TRACKS.map(x=>x.title),['Skye Cuillin','Ascending the Vale']);
   for(const track of TRACKS){assert.ok(track.file.endsWith('.mp3'));assert.ok(track.isrc.startsWith('US'));}
 });
+
+test('bridge geometry opens railings toward connected tiles',async()=>{
+  const {bridgeModel}=await import('../src/render/world');
+  const open=bridgeModel({north:false,south:false,east:false,west:false});
+  const guarded=bridgeModel({north:true,south:true,east:true,west:true});
+  assert.equal(guarded.children.length-open.children.length,4);assert.equal(open.userData.kind,'bridge');
+});
+test('health bars stay anchored even when units overlap or approach screen edges',async()=>{
+  const {arrangeHealthBars}=await import('../src/render/world');
+  const entries=[{id:1,x:200,y:200},{id:2,x:206,y:200},{id:3,x:2,y:201},{id:4,x:-30,y:200}];
+  assert.deepEqual(arrangeHealthBars(entries,800,600),entries.slice(0,3));
+});
+test('damage bars hide at rest, refresh on damage, expire and reset between maps',async()=>{
+  const {DamageVisibility}=await import('../src/render/health');const bars=new DamageVisibility();
+  const unit={id:1,hp:100,maxHp:100};
+  bars.update([unit],0);assert.equal(bars.opacity(1,0),0);
+  unit.hp=80;bars.update([unit],1);assert.equal(bars.opacity(1,1),1);
+  bars.update([unit],3.8);assert.ok(bars.opacity(1,3.8)>0&&bars.opacity(1,3.8)<1);
+  unit.hp=70;bars.update([unit],3.9);assert.equal(bars.opacity(1,4),1);
+  unit.hp=90;bars.update([unit],5);assert.equal(bars.opacity(1,7),0,'healing must not extend the timer');
+  unit.hp=50;bars.update([unit],8);assert.equal(bars.opacity(1,8),1);
+  bars.update([],8);assert.equal(bars.opacity(1,8),0,'removed units leave no bars');
+  bars.update([unit],9);bars.clear();unit.hp=100;bars.update([unit],0);assert.equal(bars.opacity(1,0),0);
+});

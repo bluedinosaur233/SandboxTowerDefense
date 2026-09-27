@@ -2,4 +2,6 @@ node_modules/
 dist/
 .playwright/
 test-results/
+outputs/
+work/
 .DS_Store

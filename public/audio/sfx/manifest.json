@@ -1,0 +1,178 @@
+[
+  {
+    "file": "wood-heavy.ogg",
+    "author": "Kenney",
+    "pack": "Impact Sounds",
+    "original": "impactWood_heavy_001.ogg",
+    "license": "CC0-1.0",
+    "sha256": "f1b07a53ac10c615fff9ba470511fdeb722b5902e1a8520759fc20ad6f546015"
+  },
+  {
+    "file": "wood-heavy-2.ogg",
+    "author": "Kenney",
+    "pack": "Impact Sounds",
+    "original": "impactWood_heavy_003.ogg",
+    "license": "CC0-1.0",
+    "sha256": "af07511902b309b3f6d8f0e1fafbe93869127fb88099ebdc0aa6a00a98dc3cb0"
+  },
+  {
+    "file": "wood-medium.ogg",
+    "author": "Kenney",
+    "pack": "Impact Sounds",
+    "original": "impactWood_medium_002.ogg",
+    "license": "CC0-1.0",
+    "sha256": "3f3f1917428b828f733a963167833c707bf88296ff158e1559c57c5cb813d799"
+  },
+  {
+    "file": "metal-hit.ogg",
+    "author": "Kenney",
+    "pack": "Impact Sounds",
+    "original": "impactMetal_medium_001.ogg",
+    "license": "CC0-1.0",
+    "sha256": "e8a9eaba7c4d27422e4eeb3e6c7100d5d7dc0f83e005efc98c960adcc5265337"
+  },
+  {
+    "file": "light-hit.ogg",
+    "author": "Kenney",
+    "pack": "Impact Sounds",
+    "original": "impactGeneric_light_001.ogg",
+    "license": "CC0-1.0",
+    "sha256": "c3cd1c073d186ae8fa35788ba94de581f1826e7427a7bb26490b2695fac18efa"
+  },
+  {
+    "file": "soft-hit.ogg",
+    "author": "Kenney",
+    "pack": "Impact Sounds",
+    "original": "impactSoft_medium_001.ogg",
+    "license": "CC0-1.0",
+    "sha256": "7642a4fd43e547afe4f7adfadb3dabb681c0ff512f52c1674bae30a726841faf"
+  },
+  {
+    "file": "mining.ogg",
+    "author": "Kenney",
+    "pack": "Impact Sounds",
+    "original": "impactMining_001.ogg",
+    "license": "CC0-1.0",
+    "sha256": "61235a18de3f3d92118235398222dbf51d448f1be70b1c8bc962b10b86f2d9c6"
+  },
+  {
+    "file": "mining-2.ogg",
+    "author": "Kenney",
+    "pack": "Impact Sounds",
+    "original": "impactMining_002.ogg",
+    "license": "CC0-1.0",
+    "sha256": "059558ec751115ca6b1441e00f0adc837c1a3eeb0a066b109e0fd879fc5d0b0c"
+  },
+  {
+    "file": "coins.ogg",
+    "author": "Kenney",
+    "pack": "RPG Audio",
+    "original": "handleCoins.ogg",
+    "license": "CC0-1.0",
+    "sha256": "8a91f969e932df709df80ee124d86a51389eed9b67f22e5e716bc2bbf60d8dab"
+  },
+  {
+    "file": "chop.ogg",
+    "author": "Kenney",
+    "pack": "RPG Audio",
+    "original": "chop.ogg",
+    "license": "CC0-1.0",
+    "sha256": "d00c2b3c9fff07e376145c8c8c45c90e5084ec192f6ce0387db233f7b86f1486"
+  },
+  {
+    "file": "click.ogg",
+    "author": "Kenney",
+    "pack": "RPG Audio",
+    "original": "metalClick.ogg",
+    "license": "CC0-1.0",
+    "sha256": "9851a69d0c613e13bceef08060ecc4148f098ef487927cbebe270d642398a3b3"
+  },
+  {
+    "file": "latch.ogg",
+    "author": "Kenney",
+    "pack": "RPG Audio",
+    "original": "metalLatch.ogg",
+    "license": "CC0-1.0",
+    "sha256": "ba9ba60b172b3ebc131a940f25793cd2e207aca7af73dc80d637277f060f1708"
+  },
+  {
+    "file": "armor.ogg",
+    "author": "Kenney",
+    "pack": "RPG Audio",
+    "original": "drawKnife1.ogg",
+    "license": "CC0-1.0",
+    "sha256": "276403e72c3b71c47bc24db3083970c23f8e5551ffa78f436f83483c56f3f0bb"
+  },
+  {
+    "file": "bell.ogg",
+    "author": "Kenney",
+    "pack": "Impact Sounds",
+    "original": "impactBell_heavy_000.ogg",
+    "license": "CC0-1.0",
+    "sha256": "94b8bb5f2d43ab65e4bcc32b28562416e9bc2c51d9fd4be1e333660ee52f977f"
+  },
+  {
+    "file": "bell-2.ogg",
+    "author": "Kenney",
+    "pack": "Impact Sounds",
+    "original": "impactBell_heavy_001.ogg",
+    "license": "CC0-1.0",
+    "sha256": "9df61e3ae9a83dc65e5a1fd3ed19d480876f3b22b963a1b9ef6fa293592dcec4"
+  },
+  {
+    "file": "magic.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/battle/magic1.wav",
+    "license": "CC0-1.0",
+    "sha256": "cadea162f3fe91c27666ab2a0516fa3bf156997d92d4f8145919126bca7b1e8a"
+  },
+  {
+    "file": "swing-1.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/battle/swing2.wav",
+    "license": "CC0-1.0",
+    "sha256": "2e4064e294d136e06c40cc562df969493907e6873f39895ca86b4a6b2e034c6e"
+  },
+  {
+    "file": "swing-2.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/battle/swing3.wav",
+    "license": "CC0-1.0",
+    "sha256": "d725421956c9958de6d7a17c4fca299abe583a1800c59eaec358ec2e82d79bae"
+  },
+  {
+    "file": "sword.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/battle/sword-unsheathe2.wav",
+    "license": "CC0-1.0",
+    "sha256": "1df8bdb5e4f852821a9b5b7cf27b2c1c516c3a6382cb14b2865005d786503b0a"
+  },
+  {
+    "file": "monster.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/gutteral beast/mnstr15.wav",
+    "license": "CC0-1.0",
+    "sha256": "6fcfe0e796ac8746785c4ae36e85675395e0c5d6b06659cc150e100dd1ce1f1b"
+  },
+  {
+    "file": "notification.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/interface/interface1.wav",
+    "license": "CC0-1.0",
+    "sha256": "89290b137f013eb02f7f192069c7e3819a71cb87f56ce3832544cd49d410d5f8"
+  },
+  {
+    "file": "water.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/inventory/bubble.wav",
+    "license": "CC0-1.0",
+    "sha256": "c5f15d81e2b169784b737d31876ef67eb6957232f3e9c8186dde12c2370c822e"
+  }
+]

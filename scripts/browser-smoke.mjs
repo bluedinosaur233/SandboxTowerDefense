@@ -1,8 +1,15 @@
 import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
+// macOS Codex Seatbelt denies Chromium Mach service registration on this Mac.
+// Stop before spawning a browser so the test does not trigger a crash dialog.
+if (process.platform === 'darwin' && process.env.CODEX_SANDBOX === 'seatbelt') {
+ console.error('Browser test stopped before launch: this macOS Codex sandbox blocks Chromium Mach service registration. Use the connected browser tool, or run this test in your normal Terminal / an approved browser-capable execution environment.');
+ process.exit(2);
+}
+
 await fs.mkdir('.playwright',{recursive:true});
-const browser = await chromium.launch({executablePath:process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true,args:['--use-angle=metal']});
+const browser = await chromium.launch({...(process.env.CHROME_PATH ? {executablePath:process.env.CHROME_PATH} : {}),headless:true,args:['--use-angle=metal']});
 const checks=[];
 try {
   const page=await browser.newPage({viewport:{width:1440,height:1000},deviceScaleFactor:1});
@@ -53,14 +60,18 @@ try {
   await page.locator('#music-toggle').click();assert.equal((await page.locator('#music-toggle').textContent()).trim(),'音乐已静音');
   await page.locator('#music-toggle').click();
   await page.locator('#close-audio').click();
-  await page.waitForFunction(()=>window.__riverwatch.audio.music.readyState>=2,{timeout:15000});const media=await page.evaluate(()=>({ready:window.__riverwatch.audio.music.readyState,volume:window.__riverwatch.audio.music.volume,track:window.__riverwatch.audio.track}));assert.ok(media.ready>=1);assert.equal(media.volume,.18);assert.equal(media.track,1);
+  await page.waitForFunction(()=>window.__riverwatch.audio.music.readyState>=2,null,{timeout:15000});const media=await page.evaluate(()=>({ready:window.__riverwatch.audio.music.readyState,volume:window.__riverwatch.audio.music.volume,track:window.__riverwatch.audio.track}));assert.ok(media.ready>=1);assert.equal(media.volume,.18);assert.equal(media.track,1);
   checks.push('bundled Celtic music, track selection, mute and mixer');
+  await page.waitForFunction(()=>{const a=window.__riverwatch.audio.diagnostics();return a.samplesLoaded===a.samplesTotal;},null,{timeout:15000});
+  const samples=await page.evaluate(()=>window.__riverwatch.audio.diagnostics());
+  assert.equal(samples.mode,'samples');assert.equal(samples.samplesLoaded,22);assert.deepEqual(samples.sampleFailures,[]);
+  checks.push('all 22 locally bundled sound files decode in the browser');
   await page.locator('#start-wave').click();
   await page.waitForFunction(()=>window.__riverwatch.game.phase==='battle');
   await page.evaluate(()=>window.__riverwatch.advance(12));
   await page.waitForFunction(()=>document.getElementById('phase-label').textContent==='交战中');
   await page.screenshot({path:'.playwright/battle.png'});
-  const sound=await page.evaluate(()=>window.__riverwatch.audio.diagnostics());assert.ok(sound.played.arrow>0);assert.equal(sound.track,'Ascending the Vale');checks.push('arrow, impact, death and battle cues are synthesized and scheduled');
+  const sound=await page.evaluate(()=>window.__riverwatch.audio.diagnostics());assert.ok(sound.played.arrow>0);assert.equal(sound.track,'Ascending the Vale');checks.push('arrow, impact, death and battle sample cues are scheduled');
   await page.locator('#pause').click();
   assert.equal(await page.evaluate(()=>window.__riverwatch.game.paused),true);await page.waitForFunction(()=>window.__riverwatch.audio.music.paused);
   checks.push('background music pauses with the simulation');
@@ -81,6 +92,21 @@ try {
   await page.locator('#restart').click();checks.push('defeat screen and restart work');
   await page.locator('#help').click();await page.getByRole('dialog').waitFor();assert.equal(await page.evaluate(()=>window.__riverwatch.game.paused),true);await page.locator('#restart-help').click();
   assert.equal(await page.evaluate(()=>window.__riverwatch.game.wave),0);checks.push('help modal pauses controls and restart resets game');
+  await page.locator('[data-tool="dig"]').click();await clickTile(17,14);
+  await page.keyboard.press('7');await clickTile(17,14);
+  assert.equal(await page.evaluate(()=>window.__riverwatch.game.tile(17,14).bridge),true);
+  await page.keyboard.press('x');await clickTile(17,14);
+  const removedBridge=await page.evaluate(()=>window.__riverwatch.game.tile(17,14));
+  assert.equal(removedBridge.bridge,false);assert.equal(removedBridge.water,true);
+  await page.keyboard.press('7');await clickTile(17,14);
+  assert.equal(await page.evaluate(()=>window.__riverwatch.game.tile(17,14).bridge),true);
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('.unit-health').count(),0);
+  await page.evaluate(()=>{window.__riverwatch.game.structures[0].hp-=10;});
+  await page.waitForFunction(()=>document.querySelectorAll('.unit-health.structure').length>0);
+  assert.equal(await page.locator('.unit-health.structure').first().textContent(),'');
+  await page.waitForFunction(()=>document.querySelectorAll('.unit-health').length===0);
+  checks.push('bridge placement and damage-only unnumbered health bars');
   await page.setViewportSize({width:390,height:844});await page.screenshot({path:'.playwright/mobile.png'});
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth);assert.equal(overflow,false);await page.locator('[data-tool="mage"]').click();assert.equal(await page.locator('[data-tool="mage"]').getAttribute('aria-pressed'),'true');await page.locator('#music-settings').click();await page.screenshot({path:'.playwright/mobile-audio.png'});await page.locator('#close-audio').click();checks.push('mobile HUD fits viewport and tools remain usable');
   assert.deepEqual(errors,[]);

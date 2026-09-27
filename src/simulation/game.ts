@@ -1,12 +1,12 @@
-export const WIDTH = 42;
-export const DEPTH = 32;
+import { WIDTH, DEPTH, MAPS, makeTerrain, type MapId, type MapDefinition } from './maps';
+export { WIDTH, DEPTH, makeTerrain } from './maps';
 export const HEIGHT_UNIT = 0.55;
 export type StructureKind = 'wall' | 'archer' | 'mage' | 'barracks';
-export type Tool = 'inspect' | StructureKind | 'dig' | 'raise' | 'remove';
+export type Tool = 'inspect' | StructureKind | 'bridge' | 'dig' | 'raise' | 'remove';
 export type EnemyKind = 'goblin' | 'runner' | 'brute';
 export interface Point { x: number; z: number }
 export interface Vec3 extends Point { y: number }
-export interface Tile extends Point { h: number; water: boolean; bridge: boolean; road: boolean; decoration: number; active: boolean }
+export interface Tile extends Point { h: number; water: boolean; bridge: boolean; bridgeBed?: number; chasm?: boolean; bridgeDeck?: number; suspension?: boolean; road: boolean; decoration: number; active: boolean }
 export interface Resources { gold: number; wood: number; stone: number }
 export interface Structure extends Point { id: number; kind: StructureKind; hp: number; maxHp: number; level: number; cooldown: number; recruit: number }
 export interface Enemy extends Vec3 { id: number; kind: EnemyKind; hp: number; maxHp: number; speed: number; damage: number; cooldown: number; path: Point[]; revision: number; repath: number; state: 'walking' | 'attacking' | 'wading'; facing: number }
@@ -19,8 +19,9 @@ export const COSTS: Record<Exclude<Tool, 'inspect' | 'remove'>, Resources> = {
   wall: { gold: 5, wood: 2, stone: 8 }, archer: { gold: 75, wood: 22, stone: 8 },
   mage: { gold: 110, wood: 8, stone: 22 }, barracks: { gold: 95, wood: 28, stone: 12 },
   dig: { gold: 8, wood: 0, stone: 0 }, raise: { gold: 5, wood: 0, stone: 5 },
+  bridge: { gold: 12, wood: 12, stone: 0 },
 };
-export const LABELS: Record<Tool, string> = { inspect: '巡视', wall: '石墙', archer: '箭塔', mage: '法师塔', barracks: '兵营', dig: '挖水道', raise: '筑高地', remove: '拆除' };
+export const LABELS: Record<Tool, string> = { inspect: '巡视', wall: '石墙', archer: '箭塔', mage: '法师塔', barracks: '兵营', bridge: '搭木桥', dig: '挖水道', raise: '筑高地', remove: '拆除' };
 export const STATS = {
   wall: { hp: 160, range: 0, damage: 0, interval: 0, muzzle: 1.4 },
   archer: { hp: 140, range: 6.4, damage: 18, interval: 0.82, muzzle: 2.25 },
@@ -36,34 +37,10 @@ export const WAVE_NAMES = ['林间斥候', '涉水来袭', '破墙重兵', '暗�
 export const key = (x: number, z: number) => z * WIDTH + x;
 export const distance3 = (a: Vec3, b: Vec3) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
 export const inSphere = (a: Vec3, b: Vec3, range: number) => distance3(a, b) <= range;
-const randomAt = (x: number, z: number) => { const n = Math.sin(x * 127.1 + z * 311.7) * 43758.5453; return n - Math.floor(n); };
-
-export function makeTerrain(): Tile[] {
-  const tiles: Tile[] = [];
-  for (let z = 0; z < DEPTH; z++) for (let x = 0; x < WIDTH; x++) {
-    const edge = Math.min(x, WIDTH - x - 1, z, DEPTH - z - 1);
-    const active = !((x < 2 || x > WIDTH-3) && (z < 3 || z > DEPTH-4)) && !(edge === 0 && randomAt(x, z) > 0.76);
-    const riverX = 21 + Math.round(Math.sin(z * 0.25) * 2);
-    const water = Math.abs(x - riverX) < 1.1;
-    const bridge = water && z >= 15 && z <= 16;
-    const roadZ = 16 + Math.round(Math.sin(x * 0.19) * 1.3);
-    const road = Math.abs(z - roadZ) < 1.05 || (x >= 35 && z >= 14 && z <= 18);
-    let h = 1;
-    if (z < 8) h += Math.min(3, Math.floor((8 - z) / 2));
-    if (z > 24) h += Math.min(2, Math.floor((z - 24) / 2));
-    if (x > 33) h += Math.min(2, Math.floor((x - 33) / 2));
-    if (x >= 7 && x <= 14 && z >= 8 && z <= 11) h += 1;
-    if (water) h = 0;
-    if (bridge) h = 1;
-    if (x >= 36 && x <= 40 && z >= 14 && z <= 18) h = 3;
-    if (x <= 2 && z >= 14 && z <= 18) h = 1;
-    tiles.push({ x, z, h, water: water && !bridge, bridge, road, active, decoration: !water && !road && randomAt(x, z) > 0.75 ? 1 + Math.floor(randomAt(x + 90, z) * 3) : 0 });
-  }
-  return tiles;
-}
 
 export class Game {
-  tiles = makeTerrain();
+  tiles: Tile[];
+  readonly map: MapDefinition;
   structures: Structure[] = [];
   enemies: Enemy[] = [];
   soldiers: Soldier[] = [];
@@ -81,8 +58,8 @@ export class Game {
   speed = 1;
   revision = 0;
   time = 0;
-  readonly spawn = { x: 1, z: 16 };
-  readonly goal = { x: 38, z: 16 };
+  readonly spawn: Point;
+  readonly goal: Point;
   message = '领主，暮河以东就交给你了。修筑防线，守住城堡。';
   messageSerial = 0;
   private nextId = 1;
@@ -91,14 +68,13 @@ export class Game {
   totalInWave = 0;
   spawnedInWave = 0;
 
-  constructor(starter = true) {
-    if (starter) {
-      this.addStructure('archer', 28, 14);
-      this.addStructure('mage', 31, 19);
-      this.addStructure('wall', 27, 13);
-      this.addStructure('wall', 27, 14);
-      this.addStructure('wall', 27, 15);
-      this.addStructure('barracks', 35, 14);
+  constructor(starter = true, readonly mapId: MapId = 'river') {
+    this.map=MAPS[mapId];
+    this.tiles=makeTerrain(mapId);
+    this.spawn={...this.map.spawn};this.goal={...this.map.goal};
+    this.message=this.map.intro;
+    if(starter){
+      for(const s of this.map.starters)this.addStructure(s.kind,s.x,s.z);
       this.recruitSoldiers();
     }
   }
@@ -116,17 +92,29 @@ export class Game {
   }
   validate(tool: Tool, x: number, z: number): string | null {
     const tile = this.tile(x, z);
-    if (!tile?.active) return '这里是山谷边缘';
+    if (!tile?.active) return '这里是地图边缘';
     if (tool === 'inspect') return null;
     if (this.phase === 'victory' || this.phase === 'defeat') return '本次战役已结束，请重新开始';
     if (this.protected(x, z)) return '请保留城堡与敌军入口的空间';
     const s = this.structureAt(x, z);
-    if (tool === 'remove') return s ? null : '选择建筑以拆除，返还一半资源';
+    if (tool === 'remove' && s) return null;
+    if (tool === 'remove' && !tile.bridge) return '选择建筑或木桥拆除，返还一半资源';
     if (s) return '这里已经有建筑了';
     if (this.enemies.some(e => Math.hypot(e.x - x, e.z - z) < 0.7) || this.soldiers.some(e => Math.hypot(e.x - x, e.z - z) < 0.7)) return '单位正占据这个位置';
+    if (tool === 'remove') return null;
     if (!this.canAfford(COSTS[tool])) return '资源不足，击退敌军或完成波次可获得补给';
+    if (tool === 'bridge') {
+      if(tile.chasm&&!tile.bridge){
+        const deck=tile.bridgeDeck??7;
+        const supported=[[-1,0],[1,0],[0,-1],[0,1]].some(([dx,dz])=>{const n=this.tile(x+dx,z+dz);return n?.active&&(!n.chasm||n.bridge)&&Math.abs(n.h-deck)<=2;});
+        return supported?null:'请从崖岸或已有桥端逐格延伸吊桥';
+      }
+      return tile.water&&!tile.bridge?null:'桥梁只能搭在水道或连接崖岸的深谷上';
+    }
+    if(tile.chasm)return '深谷只能搭建或拆除吊桥，不能挖河、填高或建塔';
+    if (tool === 'raise' && tile.bridge) return '请先拆除木桥，再改造河床';
     if (tool === 'dig' && (tile.water || tile.bridge)) return '这里已经是水道或桥梁';
-    if (tool === 'raise' && tile.h >= 6) return '已达到最高海拔';
+    if (tool === 'raise' && tile.h >= this.map.maxHeight) return '已达到最高海拔';
     if (tool !== 'dig' && tool !== 'raise' && (tile.water || tile.bridge)) return '建筑需要坚实的陆地';
     return null;
   }
@@ -135,16 +123,25 @@ export class Game {
     if (error) { this.emitSound('error',{x,z}); this.say(error); return false; }
     if (tool === 'inspect') return true;
     if (tool === 'remove') {
-      const s = this.structureAt(x, z)!;
+      const s = this.structureAt(x, z);
+      if (!s) {
+        const tile = this.tile(x, z)!, original = { ...tile };
+        tile.h = tile.bridgeBed ?? Math.max(0, tile.h - 1);
+        tile.bridge = false; tile.water = !tile.chasm; delete tile.bridgeBed; delete tile.suspension;
+        if (!this.routesRemainOpen()) { Object.assign(tile, original); this.say('这座桥是唯一通路，拆除会困住单位'); this.emitSound('error', { x, z }); return false; }
+        this.pay(COSTS.bridge, -0.5); this.revision++; this.emitSound('collapse', { x, z });
+        this.say(tile.chasm?'吊桥已拆除，敌军将改道 · 返还 50% 基础资源':'木桥已拆除，恢复水道 · 返还 50% 基础资源'); return true;
+      }
       this.pay(COSTS[s.kind], -0.5); this.destroyStructure(s.id); this.emitSound('collapse',s); this.say('建筑已拆除，返还 50% 基础建造资源'); return true;
     }
     const tile = this.tile(x, z)!;
-    if (tool === 'dig' || tool === 'raise') {
+    if (tool === 'dig' || tool === 'raise' || tool === 'bridge') {
       const original = { ...tile };
-      if (tool === 'dig') { tile.h = Math.max(0, tile.h - 1); tile.water = true; tile.bridge = false; }
+      if (tool === 'bridge') { tile.bridgeBed = tile.h; tile.h = tile.chasm ? (tile.bridgeDeck??7) : tile.h+1; tile.water = false; tile.bridge = true; if(tile.chasm)tile.suspension=true; }
+      else if (tool === 'dig') { tile.h = Math.max(0, tile.h - 1); tile.water = true; tile.bridge = false; }
       else { tile.h++; tile.water = false; tile.bridge = false; }
-      if (!this.findPath(this.spawn, this.goal, 'goblin').length || this.enemies.some(e => !this.findPath({x: Math.round(e.x), z: Math.round(e.z)}, this.goal, e.kind).length)) {
-        Object.assign(tile, original); this.say('地形过于陡峭：需要为敌军保留一条可行路线'); return false;
+      if (!this.routesRemainOpen()) {
+        delete tile.bridgeBed; delete tile.suspension; Object.assign(tile, original); this.say('地形过于陡峭：需要为敌军保留一条可行路线'); this.emitSound('error', { x, z }); return false;
       }
       tile.decoration = 0;
     } else { this.addStructure(tool, x, z); tile.decoration = 0; }
@@ -152,6 +149,30 @@ export class Game {
     this.effects.push({ id: this.nextId++, kind: 'build', x, z, y: this.ground(x, z), time: 0, duration: 0.7 });
     this.say(tool === 'dig' ? '水道已挖好 · 普通敌军涉水速度降至 38%' : tool === 'raise' ? '地势已抬高 · 高度会影响移动与真实射程' : `${LABELS[tool]}建成 · 敌军路线已重新计算`);
     return true;
+  }
+  private routesRemainOpen() {
+    const reachable = (p: Point, kind: EnemyKind = 'goblin') => (p.x === this.goal.x && p.z === this.goal.z) || this.findPath(p, this.goal, kind).length > 0;
+    return reachable(this.spawn) && this.enemies.every(e => reachable({ x: Math.round(e.x), z: Math.round(e.z) }, e.kind)) && this.soldiers.every(s=>{
+      const home=this.structures.find(b=>b.id===s.home),p={x:Math.round(s.x),z:Math.round(s.z)};
+      return !home||(p.x===home.x&&p.z===home.z)||this.findPath(p,home,'goblin',true).length>0;
+    });
+  }
+  private refreshPath(unit: Enemy | Soldier, destination: Point, kind: EnemyKind, friendly = false) {
+    const nearest = { x: Math.round(unit.x), z: Math.round(unit.z) };
+    const next = unit.path[0];
+    const betweenCenters = Math.hypot(unit.x - nearest.x, unit.z - nearest.z) > 0.000001;
+    // Finish the current edge before changing route. Rounding a moving unit to
+    // the center behind it caused a visible U-turn every three seconds.
+    const fromTile = this.tile(nearest.x, nearest.z);
+    const nextTile = next && this.tile(next.x, next.z);
+    const continueEdge = betweenCenters && next && nextTile && fromTile &&
+      Math.hypot(next.x - unit.x, next.z - unit.z) <= 1.000001 &&
+      Number.isFinite(this.moveCost(fromTile, nextTile, kind, friendly)) &&
+      (!friendly || !this.structureAt(next.x, next.z));
+    const origin = continueEdge ? next : nearest;
+    const path = this.findPath(origin, destination, kind, friendly);
+    if (Math.hypot(unit.x - origin.x, unit.z - origin.z) > 0.000001) path.unshift(origin);
+    unit.path = path; unit.revision = this.revision;
   }
   upgrade(id: number): boolean {
     const s = this.structures.find(s => s.id === id);
@@ -167,7 +188,7 @@ export class Game {
   muzzle(s: Structure): Vec3 { return { x: s.x, z: s.z, y: this.ground(s.x, s.z) + STATS[s.kind].muzzle }; }
   destroyStructure(id: number) { this.structures = this.structures.filter(s => s.id !== id); this.soldiers = this.soldiers.filter(s => s.home !== id); this.revision++; }
   moveCost(from: Tile, to: Tile, kind: EnemyKind, ignoreStructure = false) {
-    if (!to.active || Math.abs(from.h - to.h) > 2) return Infinity;
+    if (!from.active || !to.active || (from.chasm&&!from.bridge) || (to.chasm&&!to.bridge) || Math.abs(from.h - to.h) > 2) return Infinity;
     const stats = ENEMIES[kind];
     let cost = (1 + Math.abs(from.h - to.h) * 0.35) / stats.speed;
     if (to.water) cost /= stats.water;
@@ -177,7 +198,7 @@ export class Game {
   }
   findPath(start: Point, end = this.goal, kind: EnemyKind = 'goblin', friendly = false): Point[] {
     const begin = this.tile(start.x, start.z), goal = this.tile(end.x, end.z);
-    if (!begin?.active || !goal?.active) return [];
+    if (!begin?.active || !goal?.active || (begin.chasm&&!begin.bridge) || (goal.chasm&&!goal.bridge)) return [];
     const size = WIDTH * DEPTH, dist = new Float64Array(size).fill(Infinity), prev = new Int32Array(size).fill(-1), visited = new Uint8Array(size);
     const sid = key(start.x, start.z), eid = key(end.x, end.z); dist[sid] = 0;
     const open: number[] = [sid];
@@ -210,18 +231,24 @@ export class Game {
     this.spawnQueue = Array.from({ length: count }, (_, i): EnemyKind => this.wave >= 3 && i % 5 === 4 ? 'brute' : this.wave >= 2 && i % 3 === 1 ? 'runner' : 'goblin');
     this.totalInWave = count; this.spawnedInWave = 0; this.spawnTimer = 0;
     this.emitSound('wave',this.spawn);
-    this.say(`第 ${this.wave} 波 · ${WAVE_NAMES[this.wave - 1]}，敌军正在接近！`); return true;
+    this.say(`第 ${this.wave} 波 · ${this.map.waveNames[this.wave - 1]}，敌军正在接近！`); return true;
   }
   spawnEnemy(kind: EnemyKind): Enemy {
     const stats = ENEMIES[kind], hp = Math.round(stats.hp * (1 + Math.max(0, this.wave - 1) * 0.12));
     const enemy: Enemy = { id: this.nextId++, kind, x: this.spawn.x, z: this.spawn.z, y: this.ground(this.spawn.x, this.spawn.z) + 0.35, hp, maxHp: hp, speed: stats.speed, damage: stats.damage, cooldown: 0, path: [], revision: -1, repath: 0, state: 'walking', facing: Math.PI / 2 };
     this.enemies.push(enemy); return enemy;
   }
+  private guardPositions(home:Structure):Point[]{
+    return [{x:home.x-1,z:home.z+1},{x:home.x-1,z:home.z},{x:home.x,z:home.z+1},{x:home.x+1,z:home.z},{x:home.x,z:home.z-1}].filter(p=>{
+      const tile=this.tile(p.x,p.z),from=this.tile(home.x,home.z)!;
+      return tile&&Number.isFinite(this.moveCost(from,tile,'goblin',true))&&!this.structureAt(p.x,p.z);
+    });
+  }
   recruitSoldiers() {
     for (const b of this.structures.filter(s => s.kind === 'barracks')) {
       const own = this.soldiers.filter(s => s.home === b.id);
       if (own.length < 2 + (b.level - 1) && b.recruit <= 0) {
-        const options = [{x:b.x-1,z:b.z+1},{x:b.x-1,z:b.z},{x:b.x,z:b.z+1},{x:b.x+1,z:b.z},{x:b.x,z:b.z-1}];
+        const options = this.guardPositions(b);
         const position = options.find(p => this.tile(p.x,p.z)?.active && !this.structureAt(p.x,p.z) && !own.some(s => Math.hypot(s.x-p.x,s.z-p.z)<0.5));
         if (!position) continue;
         this.soldiers.push({ id: this.nextId++, home: b.id, ...position, y: this.ground(position.x, position.z) + 0.35, hp: 95 + b.level * 15, maxHp: 95 + b.level * 15, cooldown: 0, facing: -Math.PI / 2, state: 'guarding', path: [], revision: -1, repath: 0 });
@@ -275,7 +302,7 @@ export class Game {
     this.enemies = this.enemies.filter(e => e.hp > 0);
     if (this.castleHp <= 0) { this.castleHp = 0; this.phase = 'defeat'; this.emitSound('defeat'); this.say('城堡失守了。重新布置防线，再来一次。'); return; }
     if (!this.spawnQueue.length && !this.enemies.length) {
-      if (this.wave === 5) { this.phase = 'victory'; this.emitSound('victory'); this.say('你守住了暮河！边境将在黎明重获宁静。'); }
+      if (this.wave === 5) { this.phase = 'victory'; this.emitSound('victory'); this.say(`你守住了${this.map.name}！边境将在黎明重获宁静。`); }
       else { this.phase = 'preparation'; this.emitSound('wave-clear'); this.resources.gold += 80 + this.wave * 15; this.resources.wood += 40; this.resources.stone += 45; this.say(`第 ${this.wave} 波已击退 · 获得金币、木材与石料补给`); }
     }
   }
@@ -286,10 +313,7 @@ export class Game {
     if (defender) { e.state = 'attacking'; e.facing = Math.atan2(defender.x-e.x, defender.z-e.z); if (e.cooldown <= 0) { this.emitSound('melee',e); defender.hp -= e.damage; e.cooldown = 0.9; } return; }
     if (Math.hypot(e.x - this.goal.x, e.z - this.goal.z) < 0.5) { this.emitSound('castle-hit',e); this.castleHp -= e.kind === 'brute' ? 18 : 7; this.enemies = this.enemies.filter(x => x.id !== e.id); return; }
     if (e.revision !== this.revision || !e.path.length || e.repath <= 0) {
-      const origin = {x:Math.round(e.x),z:Math.round(e.z)};
-      e.path = this.findPath(origin, this.goal, e.kind);
-      if (Math.hypot(e.x-origin.x,e.z-origin.z)>0.08) e.path.unshift(origin);
-      e.revision = this.revision; e.repath = 3;
+      this.refreshPath(e, this.goal, e.kind); e.repath = 3;
     }
     const next = e.path[0]; if (!next) return;
     const blocking = this.structureAt(next.x, next.z);
@@ -305,7 +329,7 @@ export class Game {
     e.y += (this.ground(e.x,e.z) + 0.35 - e.y) * Math.min(1, dt*10);
     if(tile.water && e.state!=='wading')this.emitSound('splash',e);
     e.state = tile.water ? 'wading' : 'walking';
-    if (dist <= speed * dt + 0.01) e.path.shift();
+    if (dist <= travel + 0.000001) { e.x = next.x; e.z = next.z; e.path.shift(); }
   }
   private updateSoldier(s: Soldier, dt: number) {
     if (s.hp <= 0) return;
@@ -314,19 +338,17 @@ export class Game {
     const target = this.enemies.filter(e=>e.hp>0 && Math.hypot(e.x-home.x,e.z-home.z)<4.8).sort((a,b)=>distance3(s,a)-distance3(s,b))[0];
     s.state = 'guarding';
     if (target && distance3(s,target)<0.86) { s.state='fighting'; s.facing=Math.atan2(target.x-s.x,target.z-s.z); if(s.cooldown<=0){this.emitSound('melee',s);target.hp-=15*home.level; s.cooldown=0.8;} return; }
-    const destination = target ? {x:Math.round(target.x),z:Math.round(target.z)} : {x:home.x-1,z:home.z+1};
+    const destination = target ? {x:Math.round(target.x),z:Math.round(target.z)} : (this.guardPositions(home)[0]??{x:s.x,z:s.z});
     if(Math.hypot(s.x-destination.x,s.z-destination.z)<0.2) return;
     const origin = {x:Math.round(s.x),z:Math.round(s.z)};
     if(s.revision!==this.revision || !s.path.length || (s.repath<=0 && Math.hypot(s.x-origin.x,s.z-origin.z)<0.12)){
-      s.path=this.findPath(origin,destination,'goblin',true);
-      if(Math.hypot(s.x-origin.x,s.z-origin.z)>0.08)s.path.unshift(origin);
-      s.revision=this.revision;s.repath=0.8;
+      this.refreshPath(s,destination,'goblin',true);s.repath=0.8;
     }
     const next = s.path[0];
     if(!next) return;
     const dx=next.x-s.x,dz=next.z-s.z,dist=Math.hypot(dx,dz), travel=Math.min(dist,dt*1.55*(this.tile(origin.x,origin.z)?.water?0.4:1));
     if(dist>0.001){s.x+=dx/dist*travel;s.z+=dz/dist*travel;s.facing=Math.atan2(dx,dz);}
-    if(dist<=travel+0.01)s.path.shift();
+    if(dist<=travel+0.000001){s.x=next.x;s.z=next.z;s.path.shift();}
     s.y += (this.ground(s.x,s.z)+0.35-s.y)*Math.min(1,dt*12);
   }
 }

@@ -11,6 +11,7 @@ const paths: Record<string,string> = {
   mage:'<path d="M9 21l1-10h4l1 10M6 21h12M12 1l4 5-4 5-4-5 4-5Z"/><path d="M3 5h2M19 5h2M5 11l2-1M17 10l2 1"/>',
   barracks:'<path d="M3 21V10l9-7 9 7v11H3ZM9 21v-7h6v7M2 10h20M12 3V0"/><path d="M5 11v5M19 11v5"/>',
   raise:'<path d="M2 21v-5h6v-5h7V6h7v15H2Z"/><path d="M5 10V2M2 5l3-3 3 3"/>',
+  bridge:'<path d="M2 17h20M4 17V9m16 8V9M4 11c5 4 11 4 16 0M8 13v4m4-3v3m4-4v4M2 21c3-3 5 3 8 0s5 3 8 0"/>',
   remove:'<path d="M3 6h18M8 6V3h8v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/>',
   flag:'<path d="M5 22V3M5 3c5-5 9 5 14 0v11c-5 5-9-5-14 0"/>',
   play:'<path d="M7 3l14 9-14 9V3Z"/>',
@@ -23,6 +24,7 @@ const paths: Record<string,string> = {
   music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
   next:'<path d="M5 4l10 8-10 8V4ZM19 5v14"/>',
   compass:'<circle cx="12" cy="12" r="9"/><path d="M16 7l-3 7-6 3 3-7 6-3Z"/>',
+  mountain:'<path d="M3 20l6-11 3 5 3-8 6 14H3Z"/><path d="M14 11l2 2"/>',
   sword:'<path d="M14 3l7-1-1 7-12 12-5-5L14 3ZM3 11l10 10M2 22l4-4"/>',
   chevron:'<path d="M9 5l7 7-7 7"/>',
 };
