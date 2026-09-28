@@ -62,7 +62,7 @@ export class RangeDisplay {
   }
   show(center:Vec3,radius:number,kind:string){
     this.center.set(center.x,center.y,center.z);this.sphere.position.copy(this.center);this.sphere.scale.setScalar(radius);
-    this.groundMaterial.uniforms.radius.value=radius;this.color.set(kind==='mage'?'#bda0ff':kind==='barracks'?'#8ddcbc':'#f5c052');
+    this.groundMaterial.uniforms.radius.value=radius;this.color.set(kind==='mage'?'#bda0ff':kind==='frost'?'#a6e5ff':kind==='tesla'?'#bae7a2':kind==='cannon'?'#efa675':kind==='barracks'?'#8ddcbc':'#f5c052');
     this.ringMaterial.color.copy(this.color);this.group.visible=true;
   }
   hide(){this.group.visible=false;}

@@ -20,6 +20,25 @@ try {
   await page.waitForFunction(()=>window.__riverwatch?.world.renderer.info.render.calls>0);
   await page.screenshot({path:'.playwright/desktop.png'});
   checks.push('WebGL scene boots and renders');
+  assert.equal(await page.evaluate(()=>window.__riverwatch.snapshot().screen),'campaign');
+  await page.locator('[data-stage="mountain"]').click();
+  await page.locator('#atlas-deploy').click();
+  assert.equal(await page.evaluate(()=>window.__riverwatch.game.mapId),'mountain');
+  await page.locator('#map-select').click();
+  assert.equal(await page.evaluate(()=>window.__riverwatch.game.paused),true);
+  await page.locator('#atlas-resume').click();
+  assert.equal(await page.evaluate(()=>window.__riverwatch.snapshot().screen),'battle');
+  await page.locator('#map-select').click();
+  await page.locator('[data-stage="canyon"]').click();await page.locator('#atlas-deploy').click();
+  assert.equal(await page.evaluate(()=>window.__riverwatch.game.mapId),'canyon');
+  await page.locator('#map-select').click();
+  await page.setViewportSize({width:390,height:844});
+  await page.screenshot({path:'.playwright/campaign-mobile.png'});
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+  await page.locator('[data-stage="river"]').click();await page.locator('#atlas-deploy').click();
+  await page.setViewportSize({width:1440,height:1000});
+  checks.push('campaign selection, departure, pause/resume and mobile layout');
+
   assert.deepEqual(await page.evaluate(()=>window.__riverwatch.snapshot().map),[42,32]);checks.push('map expands to 42 × 32');
   const initial=await page.evaluate(()=>window.__riverwatch.snapshot());
   assert.equal(initial.structures,6);
@@ -28,6 +47,7 @@ try {
     assert.ok(screen,`tile ${x},${z} is visible from this camera`);await page.mouse.click(screen.x,screen.y);
   }
   for(const [tool,x,z]of [['wall',16,14],['dig',17,14],['archer',18,14],['mage',17,15],['barracks',17,18],['raise',18,16]]){
+    await page.locator(`[data-build-tab="${['wall','dig','raise','bridge'].includes(tool)?'terrain':'towers'}"]`).click();
     await page.locator(`[data-tool="${tool}"]`).click();await clickTile(x,z);
     const result=await page.evaluate(([tool,x,z])=>{const g=window.__riverwatch.game;return tool==='dig'?g.tile(x,z).water:tool==='raise'?g.tile(x,z).h>1:g.structureAt(x,z)?.kind===tool;},[tool,x,z]);
     assert.equal(result,true,`${tool} must build via actual screen click`);
@@ -80,18 +100,32 @@ try {
   for(let i=0;i<12;i++){const phase=await page.evaluate(()=>{window.__riverwatch.advance(10);return window.__riverwatch.game.phase;});if(phase!=='battle')break;}
   const battle=await page.evaluate(()=>window.__riverwatch.snapshot());assert.equal(battle.phase,'preparation');assert.ok(battle.castleHp>0);checks.push('first wave finishes with surviving castle');
   for(let wave=2;wave<=5;wave++){
-    await page.evaluate(()=>{const g=window.__riverwatch.game;for(const t of g.structures.filter(s=>s.kind==='mage'||s.kind==='archer'))if(t.level<3&&g.canAfford(g.upgradeCost(t)))g.upgrade(t.id);});
+    await page.evaluate(()=>{const g=window.__riverwatch.game;for(const t of g.structures.filter(s=>s.kind==='mage'||s.kind==='archer')){const branch=t.level===2?(t.kind==='mage'?'inferno':'marksman'):undefined;if(t.level<3&&g.canAfford(g.upgradeCost(t,branch)))g.upgrade(t.id,branch);}});
     await page.locator('#start-wave').click();
     for(let i=0;i<16;i++){const phase=await page.evaluate(()=>{window.__riverwatch.advance(10);return window.__riverwatch.game.phase;});if(phase!=='battle')break;}
   }
   const campaign=await page.evaluate(()=>window.__riverwatch.snapshot());assert.equal(campaign.phase,'victory');
   await page.locator('#restart').waitFor();await page.screenshot({path:'.playwright/victory.png'});checks.push('all five waves can be won through normal construction and upgrades');
   await page.locator('#restart').click();
+  await page.keyboard.press('9');await clickTile(18,14);
+  await page.keyboard.press('Escape');await clickTile(18,14);await page.locator('#upgrade').click();
+  const beforeBranch=await page.evaluate(()=>({...window.__riverwatch.game.resources}));
+  await page.locator('#upgrade').click();await page.locator('.branch-modal').waitFor();
+  assert.equal(await page.evaluate(()=>window.__riverwatch.game.paused),true);
+  assert.equal(await page.locator('[data-branch]').count(),2);
+  await page.locator('[data-branch="blizzard"]').click();
+  assert.equal(await page.evaluate(()=>window.__riverwatch.game.structureAt(18,14).branch),'blizzard');
+  assert.equal(await page.evaluate(()=>window.__riverwatch.game.resources.gold),beforeBranch.gold-175);
+  assert.equal(await page.evaluate(()=>window.__riverwatch.game.paused),false);
+  assert.equal(await page.locator('#upgrade').isDisabled(),true);
+  await page.screenshot({path:'.playwright/tower-specialization.png'});
+  checks.push('frost specialization modal pauses, applies the selected branch and charges its exact price');
   await page.evaluate(()=>{const g=window.__riverwatch.game;g.castleHp=1;g.startWave();const e=g.spawnEnemy('goblin');e.x=g.goal.x;e.z=g.goal.z;g.step(1/30);});
   await page.locator('#restart').waitFor();assert.equal(await page.evaluate(()=>window.__riverwatch.game.phase),'defeat');
   await page.locator('#restart').click();checks.push('defeat screen and restart work');
   await page.locator('#help').click();await page.getByRole('dialog').waitFor();assert.equal(await page.evaluate(()=>window.__riverwatch.game.paused),true);await page.locator('#restart-help').click();
   assert.equal(await page.evaluate(()=>window.__riverwatch.game.wave),0);checks.push('help modal pauses controls and restart resets game');
+  await page.locator('[data-build-tab="terrain"]').click();
   await page.locator('[data-tool="dig"]').click();await clickTile(17,14);
   await page.keyboard.press('7');await clickTile(17,14);
   assert.equal(await page.evaluate(()=>window.__riverwatch.game.tile(17,14).bridge),true);
@@ -108,7 +142,7 @@ try {
   await page.waitForFunction(()=>document.querySelectorAll('.unit-health').length===0);
   checks.push('bridge placement and damage-only unnumbered health bars');
   await page.setViewportSize({width:390,height:844});await page.screenshot({path:'.playwright/mobile.png'});
-  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth);assert.equal(overflow,false);await page.locator('[data-tool="mage"]').click();assert.equal(await page.locator('[data-tool="mage"]').getAttribute('aria-pressed'),'true');await page.locator('#music-settings').click();await page.screenshot({path:'.playwright/mobile-audio.png'});await page.locator('#close-audio').click();checks.push('mobile HUD fits viewport and tools remain usable');
+  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth);assert.equal(overflow,false);await page.locator('[data-build-tab="towers"]').click();await page.locator('[data-tool="mage"]').click();assert.equal(await page.locator('[data-tool="mage"]').getAttribute('aria-pressed'),'true');await page.locator('#music-settings').click();await page.screenshot({path:'.playwright/mobile-audio.png'});await page.locator('#close-audio').click();checks.push('mobile HUD fits viewport and tools remain usable');
   assert.deepEqual(errors,[]);
   const result={checks,errors,firstWave:battle,campaign,render:await page.evaluate(()=>({calls:window.__riverwatch.world.renderer.info.render.calls,triangles:window.__riverwatch.world.renderer.info.render.triangles,geometries:window.__riverwatch.world.renderer.info.memory.geometries}))};
   await fs.writeFile('.playwright/report.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result));

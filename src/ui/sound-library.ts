@@ -4,6 +4,10 @@ export interface SoundDefinition { files: string[]; gain: number; interval: numb
 
 // Sources, original filenames and licenses are recorded in public/audio/sfx.
 export const SOUND_LIBRARY: Record<AudioCue, SoundDefinition> = {
+  cannon:{files:['wood-heavy.ogg'],gain:.38,interval:.18,rate:.62,duration:.55},
+  explosion:{files:['wood-heavy-2.ogg','mining-2.ogg'],gain:.45,interval:.16,rate:.6,duration:.8},
+  frost:{files:['magic.wav'],gain:.15,interval:.15,rate:1.6,duration:.45},
+  thunder:{files:['magic.wav','metal-hit.ogg'],gain:.3,interval:.13,rate:.65,duration:.45},
   arrow: { files:['swing-1.wav','swing-2.wav'], gain:.22, interval:.08, rate:1.25 },
   cast: { files:['magic.wav'], gain:.19, interval:.13, rate:1.12, duration:.65 },
   impact: { files:['soft-hit.ogg','light-hit.ogg'], gain:.30, interval:.08 },
