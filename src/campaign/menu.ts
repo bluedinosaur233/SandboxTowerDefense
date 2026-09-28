@@ -5,14 +5,10 @@ import { REGION_LIFE, atlasSettlements } from './settlements';
 import { MAPS, type MapId } from '../simulation/maps';
 import { readProgress, recordVictory, PROGRESS_KEY, type CampaignProgress } from './progress';
 import { icon } from '../ui/icons';
-import { HeroPanel } from '../heroes/panel';
-import { HERO, HERO_LOADOUT_KEY, readHeroLoadouts, equipHero, type HeroLoadouts } from '../heroes/roster';
 
 export class CampaignMenu {
   readonly scene:CampaignScene;
   readonly root:HTMLElement;
-  readonly heroPanel:HeroPanel;
-  private heroLoadouts:HeroLoadouts={};
   visible=false;
   selected:MapId='river';
   private progress:CampaignProgress={};
@@ -62,24 +58,12 @@ export class CampaignMenu {
       this.get('atlas-region-detail').innerHTML=`<b>${region.name}</b><p>${region.detail}</p><p>${REGION_LIFE[index]}</p>`;this.click();
       if(window.innerWidth<=580)setDrawer(false);
     });
-    try{this.heroLoadouts=readHeroLoadouts(localStorage.getItem(HERO_LOADOUT_KEY));}catch{/* Keep session selection when storage is disabled. */}
-    const heroButton=document.createElement('button');heroButton.id='atlas-hero';
-    this.get('atlas-deploy').before(heroButton);
-    this.heroPanel=new HeroPanel(this.root,(map,id)=>{
-      this.heroLoadouts=equipHero(this.heroLoadouts,map,id);
-      try{localStorage.setItem(HERO_LOADOUT_KEY,JSON.stringify(this.heroLoadouts));}catch{/* Session-only choice. */}
-      this.updateHeroButton();
-    },()=>{this.scene.controls.enabled=this.visible;},this.click);
-    heroButton.onclick=()=>{this.scene.controls.enabled=false;this.heroPanel.show(this.selected,this.heroLoadouts[this.selected]??null);};
     this.updateCard();
   }
   private get(id:string){return this.root.querySelector<HTMLElement>(`#${id}`)!;}
   private overview(){this.exploring=null;this.root.classList.remove('exploring');this.scene.reset();this.root.querySelectorAll<HTMLElement>('[data-region]').forEach(b=>b.setAttribute('aria-pressed','false'));this.get('atlas-region-detail').innerHTML='<b>一片完整的远征大陆</b><p>河流连接群山与大海。拖动地图，发现各地的聚落、遗迹和自然奇观。</p>';}
   select(id:MapId){this.exploring=null;this.root.classList.remove('exploring');this.selected=id;this.updateCard();this.scene.focus(id);this.click();}
-  heroFor(map:MapId){return this.heroLoadouts[map]??null;}
-  private updateHeroButton(){const id=this.heroFor(this.selected);this.get('atlas-hero').innerHTML=`<img src="${HERO.avatar}" alt=""><span>${id?'随行英雄 · '+HERO.name:'选择随行英雄'}<small>${id?HERO.title:'英雄殿堂 · 每关一位'}</small></span><b>›</b>`;}
   private updateCard(){
-    this.updateHeroButton();
     const map=MAPS[this.selected],stage=STAGES.find(n=>n.id===this.selected)!;
     this.get('atlas-chapter').textContent=map.chapter;this.get('atlas-region').textContent=map.eyebrow;
     this.get('atlas-level-title').textContent=map.name;this.get('atlas-description').textContent=map.description;
@@ -91,13 +75,12 @@ export class CampaignMenu {
       const button=this.root.querySelector<HTMLButtonElement>(`[data-stage="${n.id}"]`)!;button.classList.toggle('chosen',n.id===stage.id);button.setAttribute('aria-pressed',String(n.id===stage.id));button.querySelector('small')!.textContent='★'.repeat(stars)+'☆'.repeat(3-stars);}
   }
   show(canResume:boolean){this.visible=true;this.root.hidden=false;document.body.classList.add('campaign-active');this.scene.controls.enabled=true;this.get('atlas-resume').hidden=!canResume;this.updateCard();}
-  hide(){this.heroPanel.close();this.visible=false;this.root.hidden=true;document.body.classList.remove('campaign-active');this.scene.controls.enabled=false;}
+  hide(){this.visible=false;this.root.hidden=true;document.body.classList.remove('campaign-active');this.scene.controls.enabled=false;}
   victory(id:MapId,hp:number){this.progress=recordVictory(this.progress,id,hp);try{localStorage.setItem(PROGRESS_KEY,JSON.stringify(this.progress));}catch{/* Progress remains available for this session. */}this.updateCard();}
   render(time:number){
-    if(this.heroPanel.open){this.heroPanel.render(time);return;}
     const width=window.innerWidth,height=window.innerHeight;
     if(width!==this.lastWidth||height!==this.lastHeight){this.scene.resize(width,height);this.lastWidth=width;this.lastHeight=height;}
-    this.scene.render(time,this.selected);this.heroPanel.render(time);
+    this.scene.render(time,this.selected);
     for(const stage of STAGES){const p=this.scene.project(stage.x,stage.z,sampleContinent(stage.x,stage.z).h+10.5);const marker=this.markers.get(stage.id)!;marker.style.transform=`translate(${p.x}px,${p.y}px) translate(-50%,-100%)`;marker.hidden=!p.visible;}
     this.towns.forEach((town,i)=>{const p=this.scene.project(town.x,town.z,town.buildings[0].floor+19),label=this.townLabels[i];label.style.transform=`translate(${p.x}px,${p.y}px) translate(-50%,-100%)`;label.hidden=this.scene.camera.zoom<1.8||(this.exploring!==null&&town.region!==this.exploring)||!p.visible||p.y<110||p.y>height-95;});
     const occupied:{x:number;y:number}[]=STAGES.map(s=>this.scene.project(s.x,s.z,sampleContinent(s.x,s.z).h+10.5));
