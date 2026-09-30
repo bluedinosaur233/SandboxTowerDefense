@@ -174,5 +174,878 @@
     "original": "RPG Sound Pack/inventory/bubble.wav",
     "license": "CC0-1.0",
     "sha256": "c5f15d81e2b169784b737d31876ef67eb6957232f3e9c8186dde12c2370c822e"
+  },
+  {
+    "file": "fire-burst.wav",
+    "author": "leohpaz",
+    "pack": "8 Magic Attacks",
+    "original": "04_Fire_explosion_04_medium.wav",
+    "license": "CC-BY-4.0",
+    "source": "https://opengameart.org/content/8-magic-attacks",
+    "sha256": "b4c425e04c1562cf83d3193fe40462d7014b7b1a1e3387017db247d1901833fd"
+  },
+  {
+    "file": "ice-burst.wav",
+    "author": "leohpaz",
+    "pack": "8 Magic Attacks",
+    "original": "13_Ice_explosion_01.wav",
+    "license": "CC-BY-4.0",
+    "source": "https://opengameart.org/content/8-magic-attacks",
+    "sha256": "b76c65adbc704f095fbc27593f0c2ad3dd0e6f2c105a6b70b7a6e061694d2c96"
+  },
+  {
+    "file": "thunder-burst.wav",
+    "author": "leohpaz",
+    "pack": "8 Magic Attacks",
+    "original": "18_Thunder_02.wav",
+    "license": "CC-BY-4.0",
+    "source": "https://opengameart.org/content/8-magic-attacks",
+    "sha256": "f97cd32aacb0e65085aafed9895f4a9a2740ad7b44e0d0fce2069b854c543f43"
+  },
+  {
+    "file": "water-burst.wav",
+    "author": "leohpaz",
+    "pack": "8 Magic Attacks",
+    "original": "22_Water_02.wav",
+    "license": "CC-BY-4.0",
+    "source": "https://opengameart.org/content/8-magic-attacks",
+    "sha256": "5b512129aa26aef53df6f2776d3fac3326e8457a5cdbec7556986eaae78d799d"
+  },
+  {
+    "file": "wind-burst.wav",
+    "author": "leohpaz",
+    "pack": "8 Magic Attacks",
+    "original": "25_Wind_01.wav",
+    "license": "CC-BY-4.0",
+    "source": "https://opengameart.org/content/8-magic-attacks",
+    "sha256": "78fbb9ac12dc03788e4b50638c15496472324e3944d71290fe878ce842534ed7"
+  },
+  {
+    "file": "earth-burst.wav",
+    "author": "leohpaz",
+    "pack": "8 Magic Attacks",
+    "original": "30_Earth_02.wav",
+    "license": "CC-BY-4.0",
+    "source": "https://opengameart.org/content/8-magic-attacks",
+    "sha256": "096ed69309b460103fc1149919674cc6af2b29af0b715fe8b0275205a2471d98"
+  },
+  {
+    "file": "charge.wav",
+    "author": "leohpaz",
+    "pack": "8 Magic Attacks",
+    "original": "45_Charge_05.wav",
+    "license": "CC-BY-4.0",
+    "source": "https://opengameart.org/content/8-magic-attacks",
+    "sha256": "b3cbf3109a3bd08f979ab12920e62fed8dbafdcdc6175fee2804089d070e3e16"
+  },
+  {
+    "file": "poison.wav",
+    "author": "leohpaz",
+    "pack": "8 Magic Attacks",
+    "original": "46_Poison_01.wav",
+    "license": "CC-BY-4.0",
+    "source": "https://opengameart.org/content/8-magic-attacks",
+    "sha256": "07de4efd8bb5d36ce4419f7d5f48f640b4007ecdc9b8ca66184480a7090ffc2e"
+  },
+  {
+    "file": "arcane-pulse.wav",
+    "author": "ViRiX Dreamcore (David Mckee)",
+    "pack": "Magic SFX Sample",
+    "original": "Misc 02.wav",
+    "license": "CC-BY-3.0",
+    "source": "https://opengameart.org/content/magic-sfx-sample",
+    "sha256": "21728538d4220720df0beceeb3d39da60c0b0ade9f6296ec493982755e9fe272"
+  },
+  {
+    "file": "wing-wind.wav",
+    "author": "ViRiX Dreamcore (David Mckee)",
+    "pack": "Magic SFX Sample",
+    "original": "Wind effects 5.wav",
+    "license": "CC-BY-3.0",
+    "source": "https://opengameart.org/content/magic-sfx-sample",
+    "sha256": "37424e27cceca69c0bf48a40465a8d7db2889816c67073378668af3317bb974a"
+  },
+  {
+    "file": "fire-impact.wav",
+    "author": "ViRiX Dreamcore (David Mckee)",
+    "pack": "Magic SFX Sample",
+    "original": "Fire impact 1.wav",
+    "license": "CC-BY-3.0",
+    "source": "https://opengameart.org/content/magic-sfx-sample",
+    "sha256": "0fa4afbf37b12dc6c54f33cdded356b5f344a0156b84af94b70d843886c1efad"
+  },
+  {
+    "file": "healing.wav",
+    "author": "ViRiX Dreamcore (David Mckee)",
+    "pack": "Magic SFX Sample",
+    "original": "Healing Full.wav",
+    "license": "CC-BY-3.0",
+    "source": "https://opengameart.org/content/magic-sfx-sample",
+    "sha256": "ad60bc48be1ac7451771505c0e169590af18241d38ff79b93aa6e5f186b1e54b"
+  },
+  {
+    "file": "ice-cast.wav",
+    "author": "ViRiX Dreamcore (David Mckee)",
+    "pack": "Magic SFX Sample",
+    "original": "Ice attack 2.wav",
+    "license": "CC-BY-3.0",
+    "source": "https://opengameart.org/content/magic-sfx-sample",
+    "sha256": "148e143241e6516c7229c366bb5574a29d556179ee2021c7e40bd3d5e5066311"
+  },
+  {
+    "file": "mnstr-1.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/gutteral beast/mnstr1.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "4d4979bb409239dee5e7848c9931d2c28c165069db4cdab5a2e38be52d8fb10d"
+  },
+  {
+    "file": "mnstr-2.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/gutteral beast/mnstr2.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "5a017cb86406c3c6f4ffc1a26170654a41571c383091607392c491578cc33a60"
+  },
+  {
+    "file": "mnstr-3.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/gutteral beast/mnstr3.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "c0876bdcff8443cd50389ca296cb79dab225091a690b47b8f28ba4c520b196d2"
+  },
+  {
+    "file": "mnstr-4.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/gutteral beast/mnstr4.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "10ab9dbd3d804e86c84f37db4d17c054bb76505079ae616866237033e45b2389"
+  },
+  {
+    "file": "mnstr-6.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/gutteral beast/mnstr6.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "508d933792943f0c68d1dd56d6d595a1c66b8f6372b307ebd030363d7babdedf"
+  },
+  {
+    "file": "mnstr-8.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/gutteral beast/mnstr8.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "d0d2fc0fb04e3f71a15b777671b04086c88f71cefeef6fdf18039a6ec68d0017"
+  },
+  {
+    "file": "mnstr-10.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/gutteral beast/mnstr10.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "57572215ae5c5fc093e500c2b68a4b5614bb1d314c0c23f2af6f50208a7e1c65"
+  },
+  {
+    "file": "mnstr-11.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/gutteral beast/mnstr11.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "d50f050e6de5557064e566b46646f7eeb337f9d7e04e6a538e350f5882c17239"
+  },
+  {
+    "file": "giant-1.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/giant/giant1.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "e9aeb6012c03fb426019f8d485d0da8a6aaf2e46499acd3636afe05966cd752e"
+  },
+  {
+    "file": "giant-2.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/giant/giant2.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "3e5b30a8fa8f6eb8f94bb50a43fb410669f78da13f4108f60f8a851ddde2f2a8"
+  },
+  {
+    "file": "giant-4.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/giant/giant4.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "ad27630c04029a3b454f8e99d4b61aa3516666a0437d28e3ba2f67e4f6d46801"
+  },
+  {
+    "file": "giant-5.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/giant/giant5.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "663f4dbafdd680b9103f58066a433cfd4ba7150a759fdbeb510f7f753dab6f25"
+  },
+  {
+    "file": "ogre-1.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/ogre/ogre1.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "acd9428134c6a7c02458983596a084702a9317466c86e586e008a59dc623ea8c"
+  },
+  {
+    "file": "ogre-2.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/ogre/ogre2.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "d2d27137448f24471cd401d8248920d8a2e9b903a097be7629b5c1927cd69daa"
+  },
+  {
+    "file": "ogre-4.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/ogre/ogre4.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "9c35b3748dbeb8c4f079996ce26a87237f513897fb66ce397f18c923a3cdfdb8"
+  },
+  {
+    "file": "ogre-5.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/ogre/ogre5.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "893a01f352904ad3aa500d6a43fbed3af5d704565bc52d333c498a06e37cdeac"
+  },
+  {
+    "file": "shade-1.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/shade/shade1.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "962c30499b62b49eb78e70ae72073b26f3a6328bf3bab1ad093f3d7a4db26f7c"
+  },
+  {
+    "file": "shade-2.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/shade/shade2.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "f83ebcb33463c08a8b1845adaee0df836f047ad05c91ac6ad57f9acd6813a76e"
+  },
+  {
+    "file": "shade-4.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/shade/shade4.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "94ef9090546c68994b9cd4bef4099165834dd145a2be7b81c76a6c14e74e88e8"
+  },
+  {
+    "file": "shade-5.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/shade/shade5.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "7ab407c705e68e14b3c7c23aa2900b5e169241449b074e613864fdef81e71794"
+  },
+  {
+    "file": "shade-10.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/shade/shade10.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "fa24e693ffd4b900ac619b86f17e5bdd6fd9454108f9a89eec0baed99f0d97f5"
+  },
+  {
+    "file": "shade-11.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/shade/shade11.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "159cc829c0c411cb92805f580755fdae224dfeeb4b9cd05e012f2868e883e9b9"
+  },
+  {
+    "file": "slime-1.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/slime/slime1.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "522bbe111f080fa762d0109e99db5fef8e23d030003294562972d8dd49a744a8"
+  },
+  {
+    "file": "slime-2.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/slime/slime2.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "decdb2ac4c3dcc8db1a1b24a12bf4af2f599f993ed6aff0b180efeb3f192a3c2"
+  },
+  {
+    "file": "slime-7.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/slime/slime7.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "8145ccd81fc086aba7e05706c19833db20e165e96446d6ffc66130ec8dd6dac3"
+  },
+  {
+    "file": "slime-8.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/NPC/slime/slime8.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "2219772fd3a123cd5a9c1837c0b3b5b8df6c92739907e904cf1d3385e076d982"
+  },
+  {
+    "file": "rapier-1.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/battle/sword-unsheathe3.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "4a1a54402789bd08278c332086ed427805dc5d42c3e7c3fce0f30d1e19e20c91"
+  },
+  {
+    "file": "rapier-2.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/battle/sword-unsheathe4.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "89202f82cfac83bdadbf41c88998cd5f60c00609a53c1ae769c00bf1031cd272"
+  },
+  {
+    "file": "bow-heavy.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/battle/swing.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "c7d50b9cb20ccda5aee6c023f4450915594061e36f3f9e78af241ca9fde0f817"
+  },
+  {
+    "file": "spell.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/battle/spell.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "61d79416a7cbb04e1f46618ded72386f82bb6bd9dc170170480d271f4efb3958"
+  },
+  {
+    "file": "armor-fall.wav",
+    "author": "artisticdude",
+    "pack": "RPG Sound Pack",
+    "original": "RPG Sound Pack/inventory/chainmail2.wav",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/rpg-sound-pack",
+    "sha256": "74b5e34233ea69fd76b6f016bae74f3432d7ca1921fa403c32f6c45cab2fdfa8"
+  },
+  {
+    "file": "metal-heavy.ogg",
+    "author": "Kenney",
+    "pack": "Impact Sounds",
+    "original": "Audio/impactMetal_heavy_001.ogg",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/impact-sounds",
+    "sha256": "83554049f81f4db9209379e103c30bfa63f65c42189a03f300b045c2c82e23ae"
+  },
+  {
+    "file": "metal-light.ogg",
+    "author": "Kenney",
+    "pack": "Impact Sounds",
+    "original": "Audio/impactMetal_light_002.ogg",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/impact-sounds",
+    "sha256": "25a96f90a9a1f88a531e824e126f0519504625e5635e65a72e4f31611428db29"
+  },
+  {
+    "file": "ice-shatter.ogg",
+    "author": "Kenney",
+    "pack": "Impact Sounds",
+    "original": "Audio/impactGlass_heavy_002.ogg",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/impact-sounds",
+    "sha256": "4978654ac840ad519692d5d5ba48a8101cabce13b9a577be73ad589185e5e9ed"
+  },
+  {
+    "file": "punch-heavy.ogg",
+    "author": "Kenney",
+    "pack": "Impact Sounds",
+    "original": "Audio/impactPunch_heavy_001.ogg",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/impact-sounds",
+    "sha256": "f92f5cb6ba4ff2766497292ffd90865654317eeca976f5652e0708dbdcdc0dd9"
+  },
+  {
+    "file": "magic-1.ogg",
+    "author": "JaggedStone",
+    "pack": "Magic Spell SFX",
+    "original": "magical_1_0.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/magic-spell-sfx",
+    "sha256": "119f9061a566c72c1c58444b03f8685b833079ef268dda02fe742eb34d3bc68f"
+  },
+  {
+    "file": "magic-2.ogg",
+    "author": "JaggedStone",
+    "pack": "Magic Spell SFX",
+    "original": "magical_2.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/magic-spell-sfx",
+    "sha256": "84a70f63f3f21e5ba4a48285b760a663d422ad3feddba2f3cbadd94b76cdc52e"
+  },
+  {
+    "file": "magic-3.ogg",
+    "author": "JaggedStone",
+    "pack": "Magic Spell SFX",
+    "original": "magical_3.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/magic-spell-sfx",
+    "sha256": "9fac648a1de869cf9ca2f4b3f1cd47f1766a3ee9d2fdec45831234401d7b2392"
+  },
+  {
+    "file": "magic-4.ogg",
+    "author": "JaggedStone",
+    "pack": "Magic Spell SFX",
+    "original": "magical_4.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/magic-spell-sfx",
+    "sha256": "b7862d109b4013dfb2a389a10f8917203beb0efc458444bc5a1b8ada605cc118"
+  },
+  {
+    "file": "magic-5.ogg",
+    "author": "JaggedStone",
+    "pack": "Magic Spell SFX",
+    "original": "magical_5.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/magic-spell-sfx",
+    "sha256": "69aaaaed729cacb518005a5d24074196db3c5fffc0ed2cd01ad864fbed4a62be"
+  },
+  {
+    "file": "magic-6.ogg",
+    "author": "JaggedStone",
+    "pack": "Magic Spell SFX",
+    "original": "magical_6_0.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/magic-spell-sfx",
+    "sha256": "0a18ee3460cf3fd79c3771bbf94c20c26d34b65ab60d0b0e15694ffcad815955"
+  },
+  {
+    "file": "magic-7.ogg",
+    "author": "JaggedStone",
+    "pack": "Magic Spell SFX",
+    "original": "magical_7_0.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/magic-spell-sfx",
+    "sha256": "2817da4f5df69ff993baffd6594a2f2a069f85ee2a02019f97db2246e350a76b"
+  },
+  {
+    "file": "shield.wav",
+    "author": "spookymodem",
+    "pack": "magic-shield",
+    "original": "shield.wav",
+    "license": "CC-BY-3.0",
+    "source": "https://opengameart.org/content/magic-shield",
+    "sha256": "8ed1ca8570f7e4248b5222262fd4e5acec2385050259ed28bc39607488b510dd"
+  },
+  {
+    "file": "magic-death.wav",
+    "author": "spookymodem",
+    "pack": "magic-death",
+    "original": "magic-death.wav",
+    "license": "CC-BY-3.0",
+    "source": "https://opengameart.org/content/magic-death",
+    "sha256": "89dc875d60f5689d3dc31807099cd597155d2441c69da1d0ee971e8669c12e54"
+  },
+  {
+    "file": "cannon-fire.ogg",
+    "author": "Thimras",
+    "pack": "cannon-fire",
+    "original": "cannon_fire_0.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/cannon-fire",
+    "sha256": "2b21ffa41e5c3be4eecdfbd3490544f5aa8b6d1581787265863e13de1a8e599d"
+  },
+  {
+    "file": "cannon-hit.ogg",
+    "author": "Thimras",
+    "pack": "cannon-hit",
+    "original": "cannon_hit_0.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/cannon-hit",
+    "sha256": "fd116464dda58e5c94436d17f0e76437b475b5f773603d4aaf8fa21c5f2d3b9e"
+  },
+  {
+    "file": "energy-cast.wav",
+    "author": "rubberduck",
+    "pack": "80 CC0 RPG SFX",
+    "original": "spell_01.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/80-cc0-rpg-sfx",
+    "sourceSha256": "09821a53c418c5eeeac4fa25bada9d245e822fed302eeeae9ae4151522a45ae5",
+    "sha256": "b162afea20314b56aef105f5230d47ad81ef2b956f3531c8fd29141d7c26fa75",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.036,
+      "durationSeconds": 0.596979,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
+  },
+  {
+    "file": "energy-impact.wav",
+    "author": "rubberduck",
+    "pack": "80 CC0 RPG SFX",
+    "original": "spell_02.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/80-cc0-rpg-sfx",
+    "sourceSha256": "bf9c48b76921e56aa266172d969a2c08215d6ce0ffae7c3584f23fa05d3f8bd4",
+    "sha256": "ce0899487cd661526ad744a643232fcc5945d553e651912ed0bd3f543e484769",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.02,
+      "durationSeconds": 0.526354,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
+  },
+  {
+    "file": "flame-cast.wav",
+    "author": "rubberduck",
+    "pack": "80 CC0 RPG SFX",
+    "original": "spell_fire_06.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/80-cc0-rpg-sfx",
+    "sourceSha256": "66fa753e8033d08f3837d6ef1706b0450297db68c0d4b21782a03fd9ae960d63",
+    "sha256": "c8154ba2705626a2ab7d4e5bc7b6811ab991a97d955bcbb9d33e15919dd8c63d",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.0,
+      "durationSeconds": 1.0,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
+  },
+  {
+    "file": "flame-impact.wav",
+    "author": "rubberduck",
+    "pack": "80 CC0 RPG SFX",
+    "original": "spell_fire_04.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/80-cc0-rpg-sfx",
+    "sourceSha256": "64d653cd0cc6eb71bb45a1dfbba29eaa769ed5b663cce275082d6971e4f2ca8e",
+    "sha256": "fc527f88808ff7c801011fa782f9dab4d53174c754ccf03a68b4eae4b1b3ded8",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.2,
+      "durationSeconds": 1.1,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
+  },
+  {
+    "file": "energy-surge.wav",
+    "author": "rubberduck",
+    "pack": "80 CC0 RPG SFX",
+    "original": "spell_fire_07.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/80-cc0-rpg-sfx",
+    "sourceSha256": "bb13cef9c0b0b4ec7f9335c356b14814c88418abd85dd3747cb62469e9ada93f",
+    "sha256": "02c9b7aebe96f21fb26c069f9144391d63490f0463fb41b6643345c18225557d",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.18,
+      "durationSeconds": 0.471333,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
+  },
+  {
+    "file": "flame-roar.wav",
+    "author": "rubberduck",
+    "pack": "80 CC0 RPG SFX",
+    "original": "spell_fire_05.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/80-cc0-rpg-sfx",
+    "sourceSha256": "18025b21a4ecb3b41acc0dccb0697a8930262109ea198ff8c5ef0853d3ed1cfa",
+    "sha256": "de38d51e2fa18da38983fdedcb1bc3ad9ab6ec071f74ac4d4f6404a42eda180a",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.07,
+      "durationSeconds": 1.174813,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
+  },
+  {
+    "file": "blade-cut.wav",
+    "author": "rubberduck",
+    "pack": "80 CC0 RPG SFX",
+    "original": "blade_01.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/80-cc0-rpg-sfx",
+    "sourceSha256": "caf7a7cb9b25cda4bd487c1d12d18b74a34bb18c816fd67277cf3c8d7ef32a3a",
+    "sha256": "ac1f34565d2825bc27fcdce07d422d5c2f0f48028eb79897be90d8836396a3e9",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.004,
+      "durationSeconds": 0.286917,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
+  },
+  {
+    "file": "blade-enchanted.wav",
+    "author": "rubberduck",
+    "pack": "80 CC0 RPG SFX",
+    "original": "blade_02.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/80-cc0-rpg-sfx",
+    "sourceSha256": "c770afec8f62f14d3d082d5437c5cec28e2751d393df645ddd938eabc2588abd",
+    "sha256": "4b064fe249b644fcc86575d9ba146f6226fa05216d82ee757d865279b9eb7822",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.01,
+      "durationSeconds": 0.303396,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
+  },
+  {
+    "file": "shield-block.wav",
+    "author": "rubberduck",
+    "pack": "80 CC0 RPG SFX",
+    "original": "metal_01.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/80-cc0-rpg-sfx",
+    "sourceSha256": "433d7adf123f9de425047f6dec3f7b4da510c0fd0208d4893a22be8bd22d9e34",
+    "sha256": "bbc24884c0ea4fb07a734e8dc285c2733728b62f051120d0e8167a209c735ad0",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.04,
+      "durationSeconds": 0.535854,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
+  },
+  {
+    "file": "mortar-impact.wav",
+    "author": "rubberduck",
+    "pack": "25 CC0 bang / firework SFX",
+    "original": "cannon_01.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/25-cc0-bang-firework-sfx",
+    "sourceSha256": "e87ca0ee6b53da1f21cd9086cb75f456495871618fdfed63388bd2208a872596",
+    "sha256": "e24b49fd8b292e506fb900a60ae6c47c752d93dcaf638acd81689d8e093f675b",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.08,
+      "durationSeconds": 1.158271,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
+  },
+  {
+    "file": "siege-impact.wav",
+    "author": "rubberduck",
+    "pack": "25 CC0 bang / firework SFX",
+    "original": "cannon_02.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/25-cc0-bang-firework-sfx",
+    "sourceSha256": "716392af61b29dabe637c2616091207f390d25357aae3d4c625df5dfea7e961d",
+    "sha256": "e077b6cd20db5da1eb0bf0173e9e13994b82da935d13fde57d9b772a8a84f3f5",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.002,
+      "durationSeconds": 1.6,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
+  },
+  {
+    "file": "shell-impact.wav",
+    "author": "rubberduck",
+    "pack": "25 CC0 bang / firework SFX",
+    "original": "cannon_04.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/25-cc0-bang-firework-sfx",
+    "sourceSha256": "58714ef1d8c73a52cd9358c783de4b961ee96259de112c6493a1028bc60410e8",
+    "sha256": "0f4d746257c6d5a4ed80d0289e85db4b3e8a119c38bb6c999710e82ddea3a92a",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.016,
+      "durationSeconds": 0.901979,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
+  },
+  {
+    "file": "missile-impact.wav",
+    "author": "rubberduck",
+    "pack": "25 CC0 bang / firework SFX",
+    "original": "cannon_05.ogg",
+    "license": "CC0-1.0",
+    "source": "https://opengameart.org/content/25-cc0-bang-firework-sfx",
+    "sourceSha256": "d0ab7de664533fa115a65dcc877c443fe02e8e6cc96e8051c34fe9ec66474c7b",
+    "sha256": "6d006f760e2794ad3cf5863c405fa3ce0efa502d06a597ebc00c3e223ed108aa",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.04,
+      "durationSeconds": 0.877104,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
+  },
+  {
+    "file": "electric-cast.wav",
+    "author": "Iwan 'qubodup' Gabovitch",
+    "pack": "Ice and Electricity Magic",
+    "original": "qubodupElectricityDamage01.flac",
+    "license": "CC-BY-3.0",
+    "source": "https://opengameart.org/content/ice-electricity-magic",
+    "sourceSha256": "b61131bbed47caec321f5b3ee43ebe47d91c9f5d18084348ce2af73544ca4ecc",
+    "sha256": "bdf862c301765c114e1a3aadbe74c55cd79483cbe565a63a5027efe7652143f7",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.002,
+      "durationSeconds": 0.664312,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
+  },
+  {
+    "file": "electric-crack.wav",
+    "author": "Iwan 'qubodup' Gabovitch",
+    "pack": "Ice and Electricity Magic",
+    "original": "qubodupElectricityDamage02.flac",
+    "license": "CC-BY-3.0",
+    "source": "https://opengameart.org/content/ice-electricity-magic",
+    "sourceSha256": "04226646faf6c81fb56bed3b86e12e6ad7bd28ab763b3a9dac6a10a0382593ab",
+    "sha256": "dae201e0c3c5e0f061c9d9d479d49206f91841325702f00da2cb334da04f2ffb",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.3,
+      "durationSeconds": 0.396313,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
+  },
+  {
+    "file": "ice-crack.wav",
+    "author": "Iwan 'qubodup' Gabovitch",
+    "pack": "Ice and Electricity Magic",
+    "original": "qubodupIceDamage01.flac",
+    "license": "CC-BY-3.0",
+    "source": "https://opengameart.org/content/ice-electricity-magic",
+    "sourceSha256": "7fa1b626d12bac9c83c2347f115e6b27fa49b4797aef81ac0c77300e32de6122",
+    "sha256": "8ad44535d1ece4ec24538189a84824e8463af17c180d31c48f3b9d2ef96adf9b",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.008,
+      "durationSeconds": 0.814354,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
+  },
+  {
+    "file": "ice-crush.wav",
+    "author": "Iwan 'qubodup' Gabovitch",
+    "pack": "Ice and Electricity Magic",
+    "original": "qubodupIceDamage02.flac",
+    "license": "CC-BY-3.0",
+    "source": "https://opengameart.org/content/ice-electricity-magic",
+    "sourceSha256": "582dbad281d44c102eaf0f790f65707e9b83d90d9429d38df757bcba85ca4298",
+    "sha256": "1eaf24844b24b138ee28926ae928d8414e105ce362742409b4b39881476b42b5",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.07,
+      "durationSeconds": 0.439021,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
+  },
+  {
+    "file": "ice-wind.wav",
+    "author": "Iwan 'qubodup' Gabovitch",
+    "pack": "Ice and Electricity Magic",
+    "original": "qubodupIceDamage03c.flac",
+    "license": "CC-BY-3.0",
+    "source": "https://opengameart.org/content/ice-electricity-magic",
+    "sourceSha256": "3da7975476a6dc1e53a6230f03b37902497b9b89ee1685fedf802697ff0da036",
+    "sha256": "53d3b2264456731317c330a5f618e16e784e106dfc389f4dff84cc4f13281893",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.0,
+      "durationSeconds": 0.860479,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
+  },
+  {
+    "file": "holy-breath.wav",
+    "author": "Iwan 'qubodup' Gabovitch",
+    "pack": "Ice and Electricity Magic",
+    "original": "qubodupIceDamage03d.flac",
+    "license": "CC-BY-3.0",
+    "source": "https://opengameart.org/content/ice-electricity-magic",
+    "sourceSha256": "a12554001866bfd10beef9db66c2f0bc209204e0e13338726e1ead5ffe425dd0",
+    "sha256": "0899b54736a33fe567ba3f69ebfa1fc2c75f33abe4b4ee58262169c30d23e7f4",
+    "processing": {
+      "mono": true,
+      "smoothing": "5-tap FIR [1,2,3,2,1]/9",
+      "startSeconds": 0.0,
+      "durationSeconds": 1.3,
+      "peak": 0.72,
+      "fadeOutSeconds": 0.025
+    }
   }
 ]

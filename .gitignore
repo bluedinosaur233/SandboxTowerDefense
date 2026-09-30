@@ -5,3 +5,12 @@ test-results/
 outputs/
 work/
 .DS_Store
+# Custom-license recordings are incorporated into playable builds, not redistributed as source assets.
+public/audio/licensed/
+
+# Local-only public playtest tooling.
+/scripts/share-playtest.mjs
+/scripts/playtest-server.mjs
+/tests/hosting.test.ts
+/docs/HOSTING.md
+/双击开启公网试玩.command

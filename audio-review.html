@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>战斗音效试听</title>
+<style>
+body{margin:0;background:#14221f;color:#e9eddd;font:16px/1.6 system-ui}main{max-width:850px;margin:60px auto;padding:24px}h1{font-size:32px;margin-bottom:8px}p{color:#bdc8b6}#samples{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:24px 0}button{padding:16px;background:#283e33;border:1px solid #668764;border-radius:12px;color:inherit;font:inherit;cursor:pointer;text-align:left}button:hover{background:#375441}button:disabled{opacity:.5;cursor:wait}label{display:flex;align-items:center;gap:15px}a{color:#c8dba6}small{display:block;color:#bac6b7}#status{min-height:26px}
+</style>
+<main><small>RIVERWATCH · SOUND CHECK</small><h1>战斗音效试听</h1><p>使用游戏的音量、淡出和采样播放器。连续演示中的飞行间隔仅为试听示例，局内以实际命中时刻触发。</p><button id="start">加载并开始试听</button><p id="status" role="status">Pixabay / Mixkit · 弓弦、箭矢接触、元素魔法与剑击</p><small>试听音量 65% · 不改变游戏内音乐设置</small><div id="samples"></div><section aria-label="上一版对比"><h2>上一版对比</h2><p>英雄射出已恢复最早的短破风声。命中试用实录箭矢接触的短片段，去掉叠加风声。以下保留被替换的版本供比较。</p><label>首次换版弓弦 <audio controls preload="none" src="/audio/licensed/elf-bow.wav"></audio></label><label>首次换版命中 <audio controls preload="none" src="/audio/licensed/arrow-body.wav"></audio></label><label>上一次弓弦 <audio controls preload="none" src="/audio/licensed/hero-bow-wind.wav"></audio></label><label>上一次命中 <audio controls preload="none" src="/audio/licensed/hero-arrow-soft.wav"></audio></label></section><a href="/">返回游戏</a> · <a href="/audio/LICENSED-CREDITS.md">素材来源与授权</a></main>
+<script type="module">
+import {Audio} from '/src/ui/audio.ts';
+import {LICENSED_FILES} from '/src/ui/licensed-sounds.ts';
+document.querySelectorAll('audio').forEach(a=>{a.volume=.29*.65;a.onplay=()=>{timers.forEach(clearTimeout);audio.setSuspended(true);document.querySelectorAll('audio').forEach(other=>{if(other!==a)other.pause();});};});
+const audio=new Audio();audio.musicEnabled=false;audio.enabled=true;audio.sfxVolume=.65;
+const status=document.querySelector('#status'),start=document.querySelector('#start'),samples=document.querySelector('#samples');
+let timers=[];
+const rows=[
+ ['雷罚尖塔 · 单次重雷击',[[0,'judgment'],[120,'lightning-hit']]],
+ ['雷罚尖塔 · 连续攻击',[[0,'judgment'],[120,'lightning-hit'],[2200,'judgment'],[2320,'lightning-hit']]],
+ ['箭塔 · 新发射音',[[0,'arrow']]],['箭塔 · 连续射击',[[0,'arrow'],[820,'arrow'],[1640,'arrow']]],
+ ['箭塔 · 发射与命中',[[0,'arrow'],[320,'impact']]],['游侠连弩塔 · 连射',[[0,'bow-volley'],[720,'bow-volley']]],
+ ['英雄 · 射出（最早版）',[[0,'hero-arrow']]],['英雄 · 箭矢命中',[[0,'hero-hit']]],
+ ['英雄 · 一次远程普攻',[[0,'hero-arrow'],[320,'hero-hit']]],['英雄 · 刺剑',[[0,'hero-rapier']]],
+ ['英雄 · 飞行与着陆',[[0,'hero-flight'],[1500,'hero-land']]],['英雄 · 穿透箭',[[0,'hero-piercing'],[350,'hero-skill-hit']]],
+ ['英雄 · 箭雨',[[0,'hero-rain'],...[550,850,1150,1450,1750,2050].map(t=>[t,'hero-rain-hit'])]],
+ ['英雄 · 风翼技能',[[0,'hero-gale']]],['英雄 · 出场',[[0,'hero-arrival']]],['英雄 · 战败',[[0,'hero-fall']]],
+ ['法师塔 · 施法与命中',[[0,'cast'],[450,'magic-hit']]],['火焰分支',[[0,'fire-cast'],[450,'fire-hit']]],
+ ['冰霜分支',[[0,'frost'],[450,'ice-hit']]],['雷电分支',[[0,'thunder'],[350,'lightning-hit']]],
+ ['魔剑士 · 远程与附魔斩',[[0,'spellblade-cast'],[400,'spellblade-hit'],[1000,'spellblade-slash']]],
+ ['圣骑士 · 格挡与领域',[[0,'paladin-block'],[800,'paladin-sanctuary']]],
+ ['迫击炮 · 发射与落地',[[0,'mortar'],[700,'mortar-hit']]],['魔力导弹',[[0,'missile'],[550,'missile-hit']]]
+];
+for(const [label,events] of rows){const button=document.createElement('button');button.textContent=label;button.disabled=true;button.onclick=()=>{
+ timers.forEach(clearTimeout);document.querySelectorAll('audio').forEach(a=>a.pause());audio.setSuspended(true);audio.setSuspended(false);
+ status.textContent='正在试听：'+label;
+ timers=events.map(([delay,cue])=>setTimeout(()=>audio.effect(cue),delay));
+};samples.append(button);}
+start.onclick=async()=>{start.disabled=true;status.textContent='加载中…';audio.unlock();await audio.preloadSamples();const d=audio.diagnostics();status.textContent=audio.sampleStatus+' · 新采样 '+d.licensedSamples+' / '+LICENSED_FILES.length+' · 加载失败 '+d.sampleFailures.length;samples.querySelectorAll('button').forEach(b=>b.disabled=false);start.disabled=false;start.textContent='重新检查加载';};
+
+</script></html>

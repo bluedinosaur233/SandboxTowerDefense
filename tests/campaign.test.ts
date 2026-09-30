@@ -14,13 +14,13 @@ test('the continent has large connected biome areas and dry playable outposts',(
   assert.equal(STAGES.length,Object.keys(MAPS).length);
   for(const n of STAGES){const t=sampleContinent(n.x,n.z);assert.ok(!['river','sea','coast'].includes(t.biome),n.id+' must sit on dry land');assert.ok(MAPS[n.id]);}
 });
-test('campaign progress validates storage and preserves the best completion',()=>{
-  assert.deepEqual(readProgress('broken'),{});assert.deepEqual(readProgress('null'),{});
-  assert.deepEqual(readProgress('{"river":3,"mountain":4,"canyon":-1}'),{river:3});
-  let p=recordVictory({},'river',100);assert.equal(p.river,3);
-  p=recordVictory(p,'river',10);assert.equal(p.river,3);
-  p=recordVictory(p,'mountain',50);assert.equal(p.mountain,2);
-  p=recordVictory(p,'canyon',5);assert.equal(p.canyon,1);
+test('campaign progress validates storage, drops retired stages and preserves the best completion',()=>{
+  for(const raw of ['broken','null','[]','{"windford":4}','{"windford":-1}'])assert.deepEqual(readProgress(raw),{});
+  assert.deepEqual(readProgress('{"windford":3,"river":3,"mountain":2,"canyon":1}'),{windford:3});
+  let p=recordVictory({},'windford',10);assert.equal(p.windford,1);
+  p=recordVictory(p,'windford',50);assert.equal(p.windford,2);
+  p=recordVictory(p,'windford',100);assert.equal(p.windford,3);
+  p=recordVictory(p,'windford',10);assert.equal(p.windford,3);
   assert.deepEqual(readProgress(JSON.stringify(p)),p);
 });
 
@@ -126,4 +126,35 @@ test('scaled voxel geometry and sea shelves use world units consistently',async(
   assert.equal(area,9);for(const geo of Object.values(mesh))geo.dispose();
   const shore=oceanShore(grid),pad=Math.ceil(64/1.5),row=pad*shore.width;
   assert.equal(shore.distance[row+pad+2],1.5);assert.equal(shore.distance[row+pad+3],3);assert.ok(shore.distance[row+shore.width-1]>=64);
+});
+
+
+test('departure keeps scene handoff under cloud cover, then settles at the playable camera',async()=>{
+  const {travelFrame}=await import('../src/campaign/travel');
+  for(const reduced of [false,true]){
+    const handoff=reduced?.18:1.8,duration=reduced?.42:3.25;
+    assert.equal(travelFrame(0,reduced).handoff,false);assert.equal(travelFrame(0,reduced).cover,0);
+    assert.ok(travelFrame(handoff-.001,reduced).cover>.99);
+    const switchFrame=travelFrame(handoff,reduced);assert.ok(switchFrame.handoff);assert.equal(switchFrame.cover,1);assert.equal(switchFrame.done,false);
+    let previous=0;for(let t=0;t<=duration;t+=.01){const f=travelFrame(t,reduced);assert.ok(f.cover>=0&&f.cover<=1);assert.ok(f.arrival>=previous);previous=f.arrival;if(reduced)assert.equal(f.departure,0);}
+    const finish=travelFrame(duration,reduced);assert.ok(finish.done);assert.equal(finish.cover,0);assert.equal(finish.arrival,1);
+    assert.ok(travelFrame(duration+100,reduced).done);
+  }
+});
+
+test('slow battlefield preparation holds cloud cover and preserves the entire arrival animation',async()=>{
+  const {travelFrame}=await import('../src/campaign/travel');
+  for(const reduced of [false,true]){
+    const handoff=reduced?.18:1.8,arrivalDuration=reduced?.24:1.45,readyAt=12;
+    assert.equal(travelFrame(handoff/2,reduced,null).handoff,false);
+    for(const elapsed of [handoff,5,10]){
+      const frame=travelFrame(elapsed,reduced,null);
+      assert.equal(frame.cover,1);assert.equal(frame.done,false);
+      if(!reduced)assert.equal(frame.arrival,0);
+    }
+    assert.equal(travelFrame(readyAt,reduced,readyAt).cover,1);
+    assert.equal(travelFrame(readyAt+arrivalDuration/2,reduced,readyAt).done,false);
+    const finish=travelFrame(readyAt+arrivalDuration+.001,reduced,readyAt);
+    assert.equal(finish.cover,0);assert.equal(finish.arrival,1);assert.equal(finish.done,true);
+  }
 });

@@ -1,46 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Game, inSphere, HEIGHT_UNIT, type EnemyKind } from '../src/simulation/game';
-import type { MapId } from '../src/simulation/maps';
+import { Game, COSTS, inSphere, HEIGHT_UNIT, type EnemyKind } from '../src/simulation/game';
 
 function flat(corridor=false) {
-  const g=new Game(false);
+  const g=new Game(false);Object.assign(g.spawn,{x:1,z:16});Object.assign(g.goal,{x:38,z:16});g.entrances.splice(0,g.entrances.length,{id:'test',name:'测试入口',x:1,z:16,color:'#fff'});
   for(const t of g.tiles){t.h=1;t.active=!corridor||t.z===16;t.water=false;t.bridge=false;t.decoration=0;}
   return g;
 }
 function tick(g:Game,seconds:number){for(let t=0;t<seconds;t+=1/30)g.step(1/30);}
 test('normal map has an entry-to-castle route for every enemy class',()=>{
   const g=new Game();for(const kind of ['goblin','runner','brute'] as EnemyKind[]){const path=g.previewPath(kind);assert.ok(path.length>20);assert.deepEqual(path.at(-1),g.goal);}
-});
-test('every campaign map keeps all enemy classes connected',()=>{
-  for(const mapId of ['river','mountain','canyon'] as MapId[]){
-    const g=new Game(false,mapId);
-    for(const kind of ['goblin','runner','brute'] as EnemyKind[]){
-      const path=g.previewPath(kind);
-      assert.ok(path.length>30,`${mapId}/${kind} should have a meaningful route`);
-      assert.deepEqual(path.at(-1),g.goal);
-    }
-  }
-});
-test('mountain map exposes meaningful stepped elevation',()=>{
-  const g=new Game(false,'mountain');
-  assert.ok(Math.max(...g.tiles.map(t=>t.h))>=20);
-  assert.ok(Math.min(...g.tiles.map(t=>t.h))>=2);
-  const path=g.previewPath('goblin');
-  assert.ok(new Set(path.map(p=>g.tile(p.x,p.z)!.h)).size>=8);
-});
-test('canyon bridges can be switched while preserving one route',()=>{
-  const g=new Game(false,'canyon');
-  const first=g.tiles.find(t=>t.bridge&&t.z===10)!;
-  const second=g.tiles.find(t=>t.bridge&&t.z===23)!;
-  const before=g.previewPath('goblin').length;
-  assert.ok(g.build('remove',first.x,first.z));
-  assert.ok(g.previewPath('goblin').length>before);
-  assert.equal(g.build('remove',second.x,second.z),false);
-  assert.equal(second.bridge,true);
-  assert.ok(g.build('bridge',first.x,first.z));
-  assert.equal(g.tile(first.x,first.z)!.bridge,true);
-  assert.ok(g.previewPath('goblin').length>0);
 });
 test('walls force a cheaper detour and recompute routes immediately',()=>{
   const g=flat();const before=g.findPath(g.spawn);assert.ok(before.some(p=>p.x===8&&p.z===16));
@@ -91,22 +60,22 @@ test('barracks replace casualties and upgrades expand squad capacity',()=>{
   g.phase='preparation';assert.equal(g.upgrade(b.id),true);b.recruit=0;tick(g,2);assert.equal(g.soldiers.length,3);
 });
 test('pause freezes all simulation, then a wave can complete and grant supplies',()=>{
-  const g=flat();g.startWave();g.paused=true;tick(g,2);assert.equal(g.time,0);assert.equal(g.enemies.length,0);g.paused=false;g.castleHp=10000;tick(g,90);assert.equal(g.phase,'preparation');assert.equal(g.wave,1);assert.ok(g.resources.wood>180);
+  const g=flat();g.startWave();g.paused=true;tick(g,2);assert.equal(g.time,0);assert.equal(g.enemies.length,0);g.paused=false;g.castleHp=10000;tick(g,90);assert.equal(g.phase,'preparation');assert.equal(g.wave,1);assert.equal(g.resources.gold,540);
 });
-test('castle damage produces defeat and surviving five waves produces victory',()=>{
+test('castle damage produces defeat and surviving all fifteen waves produces victory',()=>{
   const lost=flat();lost.phase='battle';lost.castleHp=1;const e=lost.spawnEnemy('goblin');e.x=lost.goal.x;e.z=lost.goal.z;lost.step(1/30);assert.equal(lost.phase,'defeat');assert.equal(lost.castleHp,0);
-  const won=flat();won.castleHp=100000;for(let wave=1;wave<=5;wave++){assert.equal(won.startWave(),true);tick(won,110);}assert.equal(won.phase,'victory');assert.equal(won.wave,5);
+  const won=flat();won.castleHp=100000;for(let wave=1;wave<=won.totalWaves;wave++){assert.equal(won.startWave(),true);tick(won,200);if(wave<won.totalWaves)assert.equal(won.phase,'preparation');}assert.equal(won.phase,'victory');assert.equal(won.wave,15);assert.equal(won.startWave(),false);
 });
 
 test('bridges span water, restore the riverbed and refund half their price',()=>{
   const g=flat(true),t=g.tile(8,16)!;t.h=0;t.water=true;const before={...g.resources};
   assert.equal(g.build('bridge',8,16),true);assert.equal(t.bridge,true);assert.equal(t.water,false);assert.equal(t.h,1);assert.equal(t.bridgeBed,0);
-  assert.equal(g.resources.gold,before.gold-12);assert.equal(g.resources.wood,before.wood-12);
+  assert.equal(g.resources.gold,before.gold-12);
   assert.equal(g.build('raise',8,16),false);assert.equal(g.build('archer',8,16),false);
   assert.equal(g.build('remove',8,16),true);assert.equal(t.bridge,false);assert.equal(t.water,true);assert.equal(t.h,0);
-  assert.equal(g.resources.gold,before.gold-6);assert.equal(g.resources.wood,before.wood-6);
+  assert.equal(g.resources.gold,before.gold-6);
 });
-test('the original river bridges can be dismantled and rebuilt',()=>{
+test('Windford crossings can be dismantled and rebuilt',()=>{
   const g=new Game(false),t=g.tiles.find(t=>t.bridge)!;
   assert.equal(g.build('remove',t.x,t.z),true);assert.equal(t.water,true);assert.equal(t.h,0);
   assert.equal(g.build('bridge',t.x,t.z),true);assert.equal(t.h,1);assert.equal(t.water,false);
@@ -214,4 +183,15 @@ test('existing overlapping soldiers spread out instead of remaining fused',()=>{
   for(const s of g.soldiers){s.x=9;s.z=15;}
   tick(g,3);assertSoldierSpacing(g);
   for(const s of g.soldiers)assert.ok(Math.hypot(s.x-s.guard.x,s.z-s.guard.z)<.1);
+});
+
+test('every construction tool uses only its advertised gold price and rejects short funds atomically',()=>{
+  for(const [tool,cost] of Object.entries(COSTS)){
+    const g=flat();assert.deepEqual(Object.keys(g.resources),['gold']);assert.deepEqual(Object.keys(cost),['gold']);
+    if(tool==='lower')g.tile(10,12)!.h=3;
+    if(tool==='bridge'){g.tile(10,12)!.water=true;g.tile(10,12)!.h=0;}
+    g.resources.gold=cost.gold-1;const before={...g.tile(10,12)!};
+    assert.equal(g.build(tool as keyof typeof COSTS,10,12),false,tool);assert.equal(g.resources.gold,cost.gold-1);assert.deepEqual(g.tile(10,12),before);
+    g.resources.gold=cost.gold;assert.equal(g.build(tool as keyof typeof COSTS,10,12),true,tool);assert.equal(g.resources.gold,0,tool);
+  }
 });

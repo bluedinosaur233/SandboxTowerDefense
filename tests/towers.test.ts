@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { Game, type Structure, type Enemy } from '../src/simulation/game';
 import { BRANCHES, TOWER_KINDS, towerAttack, branchesFor, type TowerKind, type TowerBranch } from '../src/simulation/towers';
 import { buildingModel } from '../src/render/world';
-function flat(){const g=new Game(false);for(const t of g.tiles){t.h=1;t.active=true;t.water=false;t.bridge=false;t.chasm=false;}g.resources={gold:10000,wood:10000,stone:10000};return g;}
+function flat(){const g=new Game(false);for(const t of g.tiles){t.h=1;t.active=true;t.water=false;t.bridge=false;t.chasm=false;}g.resources={gold:10000};return g;}
 function tick(g:Game,time:number){for(let t=0;t<time-1e-9;t+=1/30)g.step(Math.min(1/30,time-t));}
 function enemy(g:Game,x=12,z=10,kind:Enemy['kind']='goblin'){const e=g.spawnEnemy(kind);Object.assign(e,{x,z,y:.9,speed:0,damage:0,hp:2000,maxHp:2000});return e;}
 function tower(g:Game,kind:TowerKind,branch?:TowerBranch){const t=g.addStructure(kind,10,10);if(branch){assert.ok(g.upgrade(t.id));assert.ok(g.upgrade(t.id,branch));}return t;}
@@ -24,9 +24,9 @@ test('every attack tower has two exclusive tier-three branches and invalid upgra
   }
 });
 test('insufficient resources and completed battles prevent specialization atomically',()=>{
-  const g=flat(),t=tower(g,'cannon');g.upgrade(t.id);g.resources={gold:1000,wood:0,stone:1000};
+  const g=flat(),t=tower(g,'cannon');g.upgrade(t.id);g.resources={gold:204};
   const before={...g.resources},rev=g.revision;assert.equal(g.upgrade(t.id,'bombard'),false);assert.equal(t.level,2);assert.equal(t.branch,undefined);assert.deepEqual(g.resources,before);assert.equal(g.revision,rev);
-  g.resources.wood=1000;g.phase='victory';assert.equal(g.upgrade(t.id,'bombard'),false);assert.equal(t.level,2);
+  g.resources.gold=1000;g.phase='victory';assert.equal(g.upgrade(t.id,'bombard'),false);assert.equal(t.level,2);
 });
 test('cannon splash is physical, spherical, and explodes even after its original target dies',()=>{
   const g=flat(),t=tower(g,'cannon'),a=enemy(g,12,10,'ironclad'),b=enemy(g,12,11,'runeguard'),high=enemy(g,12,9);g.tile(12,9)!.h=20;high.y=g.ground(12,9)+.35;
@@ -58,10 +58,10 @@ test('arcane bypasses resistance and removes mage splash; judgment replaces the 
 });
 test('burn uses magic resistance and awards a kill once when damage over time finishes a target',()=>{
   const g=flat(),t=tower(g,'mage','inferno'),e=enemy(g,12,10,'runeguard');enemy(g,30,25);shoot(g,t);const hp=e.hp;tick(g,1);close(hp-e.hp,7*.35);
-  e.hp=1;const kills=g.kills,gold=g.resources.gold;tick(g,1);assert.equal(g.kills,kills+1);assert.equal(g.resources.gold,gold+20);tick(g,2);assert.equal(g.kills,kills+1);
+  e.hp=1;const kills=g.kills,gold=g.resources.gold;tick(g,1);assert.equal(g.kills,kills+1);assert.equal(g.resources.gold,gold+12);tick(g,2);assert.equal(g.kills,kills+1);
 });
-test('shrapnel reduces later physical hits without stacking, then armor returns',()=>{
-  const g=flat(),t=tower(g,'cannon','shrapnel'),e=enemy(g,12,10,'ironclad');shoot(g,t);close(2000-e.hp,51*.4);assert.equal(g.enemyArmor(e),35);
+test('magic missiles reduce later physical hits without stacking, then armor returns',()=>{
+  const g=flat(),t=tower(g,'cannon','shrapnel'),e=enemy(g,12,10,'ironclad');shoot(g,t);close(2000-e.hp,51);assert.equal(g.enemyArmor(e),35);
   t.cooldown=0;shoot(g,t);assert.equal(g.enemyArmor(e),35);
   const archer=tower(g,'archer');const hp=e.hp;shoot(g,archer);close(hp-e.hp,18*.65);
   tick(g,4.1);assert.equal(g.enemyArmor(e),60);
@@ -72,9 +72,9 @@ test('all towers respect spherical elevation and branch attacks are snapshotted 
 });
 test('all tower tiers and branches have distinct model geometry',()=>{
   for(const kind of TOWER_KINDS){
-    const signature=(level:number,branch?:TowerBranch)=>{const g=buildingModel(kind,level,branch);g.updateMatrixWorld(true);const meshes:unknown[]=[];g.traverse(o=>{if((o as any).isMesh)meshes.push([o.matrixWorld.toArray(),(o as any).geometry.type,(o as any).material.color?.getHexString()]);});return JSON.stringify(meshes);};
+    const signature=(level:number,branch?:TowerBranch)=>{const g=buildingModel(kind,level,branch);g.updateMatrixWorld(true);const meshes:unknown[]=[];g.traverse(o=>{if((o as any).isMesh)meshes.push([o.matrixWorld.toArray(),Array.from((o as any).geometry.getAttribute('position').array),Array.from((o as any).geometry.getAttribute('color')?.array??[]),(o as any).material.color?.getHexString()]);});return JSON.stringify(meshes);};
     assert.notEqual(signature(1),signature(2));const branches=branchesFor(kind);assert.notEqual(signature(3,branches[0].id),signature(3,branches[1].id));
-    for(const branch of branches)assert.equal(towerAttack({kind,level:3,branch:branch.id}).damageType,kind==='cannon'||kind==='archer'?'physical':'magic');
+    for(const branch of branches)assert.equal(towerAttack({kind,level:3,branch:branch.id}).damageType,(kind==='cannon'&&branch.id!=='shrapnel')||kind==='archer'?'physical':'magic');
   }
 });
 
@@ -96,8 +96,32 @@ test('weaker slow never refreshes a stronger slow, but can apply again after exp
 
 test('projectiles follow a moving victim and retain the last known impact point after its death',()=>{
   const g=flat(),c=tower(g,'cannon'),e=enemy(g);e.speed=1;
-  g.phase='battle';g.step(1/30);c.cooldown=100;const shot=g.shots[0],launchX=shot.to.x;
-  tick(g,.2);assert.ok(shot.to.x>launchX);close(shot.to.x,e.x);
+  g.phase='battle';g.step(1/30);c.cooldown=100;const shot=g.shots[0],launch={...shot.to};
+  tick(g,.2);assert.ok(Math.hypot(shot.to.x-launch.x,shot.to.z-launch.z)>.01);close(shot.to.x,e.x);close(shot.to.z,e.z);
   const last={...shot.to};e.hp=0;const bystander=enemy(g,last.x,last.z);
   tick(g,.6);assert.deepEqual(shot.to,last);assert.ok(bystander.hp<2000);
+});
+
+test('in-flight projectiles and their impacts keep launch-tier visuals through upgrades',()=>{
+  const g=flat(),t=tower(g,'mage');enemy(g);g.phase='battle';g.step(1/30);
+  const shot=g.shots[0];assert.equal(shot.appearance?.level,1);
+  g.upgrade(t.id);g.upgrade(t.id,'inferno');t.cooldown=100;tick(g,.45);
+  const impact=g.effects.find(e=>e.kind==='magic');assert.equal(impact?.appearance?.level,1);assert.equal(impact?.appearance?.branch,undefined);
+  t.cooldown=0;g.step(1/30);assert.deepEqual(g.shots[0].appearance,{level:3,branch:'inferno'});
+  t.cooldown=100;tick(g,.45);assert.ok(g.effects.some(e=>e.appearance?.branch==='inferno'));
+});
+test('chain impacts inherit the lightning tower specialization',()=>{
+  const g=flat(),t=tower(g,'tesla','tempest');enemy(g,12,10);enemy(g,13,10);enemy(g,14,10);
+  g.phase='battle';g.step(1/30);t.cooldown=100;tick(g,.1);
+  const impacts=g.effects.filter(e=>e.kind==='lightning');assert.equal(impacts.length,3);
+  assert.ok(impacts.every(e=>e.appearance?.level===3&&e.appearance.branch==='tempest'));
+});
+
+test('detailed towers batch static blocks and share geometry without sharing animated poses',()=>{
+  for(const kind of TOWER_KINDS)for(const branch of [undefined,...branchesFor(kind).map(b=>b.id)]){
+    const a=buildingModel(kind,branch?3:1,branch),b=buildingModel(kind,branch?3:1,branch);let draws=0;
+    a.traverse(o=>{if((o as any).isMesh){draws++;const p=(o as any).geometry.getAttribute('position');assert.ok(p.count>0);for(const n of p.array)assert.ok(Number.isFinite(n));}});
+    assert.ok(draws<=4,kind+' needs '+draws+' draws');
+    if(kind==='mage'){a.getObjectByName('crystal')!.rotation.y=1;assert.equal(b.getObjectByName('crystal')!.rotation.y,0);}
+  }
 });

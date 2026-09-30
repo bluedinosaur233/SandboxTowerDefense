@@ -1,0 +1,12 @@
+A production-ready enemy portrait icon atlas for an original voxel fantasy tower-defense game. EXACT 4 columns x 2 rows on a 1536x1024 canvas. 8 separate SQUARE-COMPOSED bust portraits centered in equal 384x512 cells with 12% safe margin. Dark desaturated forest-green #173b32 background in each cell, no grid lines, no borders, no text, no labels. Crisp polished 3D voxel aesthetic with angular block faces, chunky readable shapes, expressive menace without gore, warm key light, subtle colored rim. Portraits show head, shoulders, chest and signature weapon. Every character distinct in species, shape, face, equipment and palette, coherent with voxel game models.
+TOP ROW left to right:
+1 GOBLIN RAIDER: small green goblin, long pointed ears, crooked nose, mischievous teeth, brown leather cap and scrappy leather vest, short rusty sword and roundish wooden shield, olive green skin.
+2 WOLF RUNNER: lean tan/brown anthropomorphic wolf raider, long wolf muzzle, erect ears, amber eyes, leather harness and two small daggers, shaggy fur collar, fast sly silhouette.
+3 WALLBREAKER BRUTE: massive grey-olive ORC with square heavy jaw, two ivory tusks, one spiked iron shoulder plate, leather straps, giant stone-and-iron hammer beside head, hulking asymmetric shoulders.
+4 IRONCLAD GUARD: short stout armored DWARF, thick reddish braided beard, enclosed slate-blue steel helmet with narrow eye slit, giant blue steel shield with brass band, little visible face.
+BOTTOM ROW left to right:
+5 RUNE GUARD: tall imposing animated stone/armored GOLEM, purple-grey stone face without human skin, glowing violet eyes, angular amethyst horns, luminous violet diamond rune embedded in chest, huge block pauldrons and crystal club.
+6 MARSH STALKER: teal-green amphibian frog hunter, broad frog mouth, raised bulbous gold eyes, mossy leather straps, webbed hand with a bone-tipped trident, wet green mottling, no human face.
+7 ASH HEXER: thin occult mage in dark plum hood, bone-white angular skull mask with dark eye sockets, forked wooden staff with a pink-red ember crystal, small bone charms, eerie magic.
+8 GARGOYLE: blue-grey living stone gargoyle, angular bat-like ears and horns, gold glowing eyes, short fangs, folded stone bat wings visible behind shoulders, craggy block stone anatomy, not a human wearing armor.
+Portraits must remain readable when cropped square and downscaled to 48px. Render actual voxel blocks with flattering lighting, not flat colored placeholder icons.

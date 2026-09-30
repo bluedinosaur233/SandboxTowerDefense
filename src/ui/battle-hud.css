@@ -1,0 +1,35 @@
+/* Economy labels are contextual; touch/keyboard users can open the estate toolbar. */
+.site-marker[hidden]{display:none}.site-marker:not(.expanded){background:none;border:0;box-shadow:none;padding:0;min-width:0;pointer-events:none}
+.site-marker:not(.expanded)>span,.site-marker:not(.expanded)>b,.site-marker:not(.expanded)>small{display:none}
+.estate-tabs{display:flex;gap:5px;margin:0 19px 10px 0;flex-shrink:0}.estate-tabs button{flex:1;padding:6px 3px;font-size:10px;background:#ffffff09;border:1px solid #b89d6655;border-radius:3px;color:#c5b387}.estate-tabs button[aria-pressed=true]{background:#ba924a33;color:#f3d798;border-color:#d0af72}
+.front-marker{transform:translate(-50%,-50%);padding:5px 9px 5px 30px;max-width:140px;white-space:nowrap}
+.front-direction{position:absolute;left:5px;top:50%;font:24px/1 sans-serif;color:#ffe59b;transform:translateY(-50%) rotate(var(--front-angle));text-shadow:0 1px 3px #000;pointer-events:none}
+.front-marker.detached{border-width:2px;box-shadow:0 0 0 3px #dba24e22,0 3px 12px #0005}.front-marker.detached .front-direction{color:#fff0ad}
+.front-marker>span{font-size:12px!important}.front-marker small{margin-top:2px}
+/* The permanent mission paragraph becomes a single status line on compact screens. */
+@media(max-width:1100px),(max-height:720px){
+  .identity{top:16px;left:18px;gap:8px}.identity .crest,.identity .eyebrow{display:none}.identity h1{font-size:23px;margin:0}.identity .chapter{font-size:8px;margin-top:3px}
+  .objective{top:66px;left:18px;padding:0;max-width:290px;background:none;border:0;box-shadow:none;pointer-events:none}.objective:before,.objective>.eyebrow,.objective h2,.objective>p{display:none}.objective-meta{font-size:9px;margin:0;border:0;padding:0;gap:5px}.objective-meta b{display:none}
+  .resource-bar{top:14px;right:16px;padding:9px 12px}.resource span{font-size:19px}.resource .icon{width:18px;height:18px}
+  .top-actions{top:68px;right:16px;gap:5px}.icon-button{width:29px;height:29px}.icon-button .icon{width:16px;height:16px}
+  .wave-panel{width:186px;right:14px;bottom:145px;padding:9px 10px 6px}.wave-title{margin:0;line-height:1}.wave-title b{font-size:18px}.wave-title>span{font-size:9px;letter-spacing:0}
+  .wave-panel .wave-briefing,.wave-panel .front-switches,.wave-panel .wave-track{display:none}.scout-callout{font-size:10px;padding:6px;margin:6px 0}.scout-callout .icon{width:17px;height:17px}.scout-callout small{font-size:8px}.time-controls{margin-top:5px}.time-controls button{font-size:10px}#start-wave{height:32px;min-height:0;font-size:11px}
+  .harvest-report{padding:4px 6px;margin:5px 0}.harvest-report small{display:none}.harvest-report b{font-size:10px}
+  .camera-hint p,.version,#keep-label{display:none}.camera-hint{bottom:145px;left:16px}.camera-hint button{width:35px;height:35px}.camera-hint .icon{width:32px;height:32px}
+  .selection{top:auto;bottom:145px;left:14px;width:215px;max-height:min(48dvh,320px);padding:13px 12px 8px}.selection-title h3{font-size:17px}.selection p{font-size:10px}
+  .toast{bottom:148px;max-width:50vw;padding:8px 18px;font-size:10px}.hover-info{display:none}
+}
+@media(max-width:540px){
+  .identity{left:12px;top:14px}.identity h1{font-size:19px}.identity .chapter{display:none}.resource-bar{right:10px;top:10px;padding:7px 9px;gap:9px}.resource span{font-size:15px}
+  .objective{left:12px;top:46px;max-width:calc(100vw - 24px)}.objective-meta{font-size:8px;white-space:nowrap}.top-actions{top:70px;right:10px;gap:4px}.icon-button{width:28px;height:28px}
+  .wave-panel{width:156px;bottom:125px;right:10px;padding:7px 8px 5px}.wave-title b{font-size:15px}.scout-callout{font-size:9px;gap:5px}.scout-callout small{font-size:7px}.scout-callout .icon{width:15px}.time-controls>span{display:none}.time-controls{justify-content:space-between}
+  .selection{left:10px;bottom:125px;width:calc(100vw - 20px);max-height:36dvh;z-index:8}.selection p{font-size:9px}.estate-tabs button{font-size:10px}
+  #app:has(.selection:not(.hidden)) .wave-panel{visibility:hidden}.camera-hint{bottom:125px}.toast{bottom:126px;left:12px;transform:none;max-width:calc(100vw - 188px);font-size:9px}
+  .front-marker{font-size:9px;padding:5px 7px 5px 27px;max-width:126px}.front-direction{font-size:22px}.front-marker small{font-size:7px}.site-marker.expanded{font-size:9px}
+}
+
+@media(max-width:1100px),(max-height:720px){
+  .selection,.wave-panel,.camera-hint{bottom:calc(var(--dock-clear,160px) + 10px)}
+  .toast{bottom:calc(var(--dock-clear,160px) + 10px)}
+}
+@media(max-width:540px){#app:has(.selection:not(.hidden)) .front-marker{visibility:hidden}}

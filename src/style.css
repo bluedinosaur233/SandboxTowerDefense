@@ -121,3 +121,14 @@ body { background: #d6d0ad; }
 .unit-health.friendly span{background:#75b941}
 .unit-health.structure{width:36px;margin-left:-18px}
 .unit-health.structure span{background:#75b941}
+
+/* Windford's production landmarks and telegraphed attack fronts. */
+#battle-sites{position:absolute;inset:0;pointer-events:none;z-index:4}
+.site-marker{position:absolute;transform:translate(-50%,-100%);pointer-events:auto;min-width:98px;padding:6px 10px;color:#e8d8b1;background:linear-gradient(150deg,#493b29ed,#292c23ed);border:1px solid #baa06c;border-radius:3px;box-shadow:0 3px 9px #17201655;cursor:pointer;text-align:center}
+.site-marker>span{display:inline-block;margin-right:5px;color:#d5b276}.site-marker b{font-size:11px;letter-spacing:1px}.site-marker small{display:block;font-size:9px;margin-top:3px;color:#c3b58f}.site-marker.working{border-color:#a9c186}.site-marker.working small{color:#c3d8a0}.site-marker:hover{background:#5b5635;border-color:#f2d996}.site-marker:focus-visible{outline:2px solid #f9e4ae;outline-offset:3px}
+.wave-briefing{font-size:10px;line-height:1.6;color:#d3c5a2;margin:10px 0;max-width:235px}.campaign-active #battle-sites{display:none}
+@media(max-width:540px){.wave-briefing{font-size:9px;max-height:58px;overflow:auto;margin:5px 0}.site-marker{min-width:78px;padding:4px 6px}.site-marker b{font-size:9px}.site-marker small{font-size:8px}}
+.objective{max-width:310px}.objective p{max-width:280px;line-height:1.65}.objective h2{font-size:18px}
+@media(max-width:800px){.objective{max-width:240px}.objective h2{font-size:15px}.objective p{font-size:10px}}
+@media(max-width:540px){.objective{max-width:190px}.objective h2{font-size:13px}.objective p{display:none}}
+.front-switches{display:flex;gap:5px;margin:7px 0}.front-switches button{flex:1;background:#ffffff08;border:1px solid #c1a56d36;border-radius:3px;font-size:10px;color:#ad9d7a;padding:4px}.front-switches button.incoming{background:#ab693b3d;color:#f4d59a;border-color:#d0a35d}.front-switches button:hover{background:#b4935140}

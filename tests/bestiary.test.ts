@@ -4,9 +4,11 @@ import { Game, HEIGHT_UNIT } from '../src/simulation/game';
 import { ENEMIES, ENEMY_KINDS, waveEnemies, type EnemyKind } from '../src/simulation/enemies';
 import { damageAfterDefense } from '../src/simulation/combat';
 import { readJournal, discover, readEntry } from '../src/bestiary/progress';
-import { unitModel } from '../src/render/world';
+import { unitModel } from '../src/render/units';
+import { createHash } from 'node:crypto';
+import { Mesh } from 'three';
 import type { MapId } from '../src/simulation/maps';
-function flat(){const g=new Game(false);for(const t of g.tiles){t.h=1;t.active=true;t.water=false;t.bridge=false;t.chasm=false;}return g;}
+function flat(){const g=new Game(false);Object.assign(g.spawn,{x:1,z:16});Object.assign(g.goal,{x:38,z:16});for(const t of g.tiles){t.h=1;t.active=true;t.water=false;t.bridge=false;t.chasm=false;}return g;}
 function enemy(g:Game,kind:EnemyKind,x=10,z=10){const e=g.spawnEnemy(kind);Object.assign(e,{x,z,y:HEIGHT_UNIT+.35,speed:0});return e;}
 function near(actual:number,expected:number){assert.ok(Math.abs(actual-expected)<1e-7,`${actual} != ${expected}`);}
 
@@ -29,7 +31,7 @@ test('soldier swords use physical defense while enemy spells use soldier resista
   const e=enemy(g,'ironclad',9.3,10);e.damage=0;g.phase='battle';g.step(1/30);near(e.maxHp-e.hp,15*.4);
   const h=flat();h.addStructure('barracks',11,10);h.recruitSoldiers();const defender=h.soldiers[0];Object.assign(defender,{x:10,z:10,y:.9,armor:80,resistance:25});
   enemy(h,'hexer',8,10);h.phase='battle';h.step(1/30);near(defender.maxHp-defender.hp,18*.75);
-  assert.ok(h.drainSounds().some(c=>c.kind==='cast'));
+  assert.ok(h.drainSounds().some(c=>c.kind==='hexer-attack'));
 });
 test('ranged spells cannot pass through a wall or elevated terrain',()=>{
   for(const obstacle of ['wall','cliff']){
@@ -48,11 +50,12 @@ test('attacks against buildings apply matching defense and path costs include mi
   assert.ok(armored>g.moveCost(from,to,'goblin'));
 });
 test('all new enemy types have distinct models and participate in reachable campaign waves',()=>{
-  const models=ENEMY_KINDS.map(kind=>{const model=unitModel(kind);assert.equal(model.userData.kind,kind);return JSON.stringify(model.children.map(c=>[c.position.toArray(),c.scale.toArray(),(c as any).material?.color?.getHexString()]));});
+  const models=ENEMY_KINDS.map(kind=>{const model=unitModel(kind);assert.equal(model.userData.kind,kind);const hash=createHash('sha256');model.traverse(o=>{if(o instanceof Mesh)for(const name of ['position','color']){const attr=o.geometry.getAttribute(name);if(attr)hash.update(Buffer.from(attr.array.buffer));}});return hash.digest('hex');});
   assert.equal(new Set(models).size,ENEMY_KINDS.length);
-  for(const map of ['river','mountain','canyon'] as MapId[]){
+  for(const map of ['windford'] as MapId[]){
     const kinds=new Set<EnemyKind>();
-    for(let wave=1;wave<=5;wave++){const troops=waveEnemies(wave,map);assert.equal(troops.length,8+wave*4);troops.forEach(k=>kinds.add(k));}
+    const totalWaves=new Game(false,map).totalWaves;
+    for(let wave=1;wave<=totalWaves;wave++){const troops=waveEnemies(wave,map);assert.equal(troops.length,8+wave*4);troops.forEach(k=>kinds.add(k));}
     assert.equal(kinds.size,ENEMY_KINDS.length);
     const g=new Game(false,map);for(const kind of kinds)assert.deepEqual(g.previewPath(kind).at(-1),g.goal);
   }

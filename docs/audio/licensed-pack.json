@@ -1,0 +1,524 @@
+{
+  "version": 1,
+  "reviewedOn": "2026-09-30",
+  "sources": {
+    "mixkit-881": {
+      "file": "881.wav",
+      "title": "Icicles spell whoosh",
+      "author": "Mixkit",
+      "source": "https://mixkit.co/free-sound-effects/download/881/?context=item+grid",
+      "download": "https://assets.mixkit.co/active_storage/sfx/881/881.wav",
+      "license": "Mixkit Sound Effects Free License",
+      "licenseUrl": "https://mixkit.co/license/#sfxFree",
+      "sha256": "f2b697ca91377e5f66fa4ccc1798a87fc1d03e108554b39d2075103e9bccbd02"
+    },
+    "mixkit-882": {
+      "file": "882.wav",
+      "title": "Thin icicles spell",
+      "author": "Mixkit",
+      "source": "https://mixkit.co/free-sound-effects/download/882/?context=item+grid",
+      "download": "https://assets.mixkit.co/active_storage/sfx/882/882.wav",
+      "license": "Mixkit Sound Effects Free License",
+      "licenseUrl": "https://mixkit.co/license/#sfxFree",
+      "sha256": "2f36116b068a551d7b249e34f4cd9b12b7a4b7de4d0c605fe25d71a030d177d5"
+    },
+    "mixkit-1338": {
+      "file": "1338.wav",
+      "title": "Fire spell with explosion",
+      "author": "Mixkit",
+      "source": "https://mixkit.co/free-sound-effects/download/1338/?context=item+grid",
+      "download": "https://assets.mixkit.co/active_storage/sfx/1338/1338.wav",
+      "license": "Mixkit Sound Effects Free License",
+      "licenseUrl": "https://mixkit.co/license/#sfxFree",
+      "sha256": "8529c0caed900e43b3dafe01e0f7baa5d8946bc62bf97762ceba7bf279182c6a"
+    },
+    "mixkit-2610": {
+      "file": "2610.wav",
+      "title": "Wind magic whoosh",
+      "author": "Mixkit",
+      "source": "https://mixkit.co/free-sound-effects/download/2610/?context=item+grid",
+      "download": "https://assets.mixkit.co/active_storage/sfx/2610/2610.wav",
+      "license": "Mixkit Sound Effects Free License",
+      "licenseUrl": "https://mixkit.co/license/#sfxFree",
+      "sha256": "29e678fdefcd302a047aba51d4c76a8add088dc96d9f6e4454cc28f65fa1479f"
+    },
+    "mixkit-1694": {
+      "file": "1694.wav",
+      "title": "Short explosion",
+      "author": "Mixkit",
+      "source": "https://mixkit.co/free-sound-effects/download/1694/?context=item+grid",
+      "download": "https://assets.mixkit.co/active_storage/sfx/1694/1694.wav",
+      "license": "Mixkit Sound Effects Free License",
+      "licenseUrl": "https://mixkit.co/license/#sfxFree",
+      "sha256": "8c1a3261c957706fcbd101e6af767f6c917123f7d0856aaed484beca4687aad4"
+    },
+    "mixkit-2158": {
+      "file": "2158.wav",
+      "title": "Quick saber cut",
+      "author": "Mixkit",
+      "source": "https://mixkit.co/free-sound-effects/download/2158/?context=item+grid",
+      "download": "https://assets.mixkit.co/active_storage/sfx/2158/2158.mp3",
+      "license": "Mixkit Sound Effects Free License",
+      "licenseUrl": "https://mixkit.co/license/#sfxFree",
+      "sha256": "7a17d276190701ff00b5841eb995f499632d1ff1a9363b0883d092c60cc56a1a"
+    },
+    "mixkit-2765": {
+      "file": "2765.wav",
+      "title": "Sword strikes armor",
+      "author": "Mixkit",
+      "source": "https://mixkit.co/free-sound-effects/download/2765/?context=item+grid",
+      "download": "https://assets.mixkit.co/active_storage/sfx/2765/2765.wav",
+      "license": "Mixkit Sound Effects Free License",
+      "licenseUrl": "https://mixkit.co/license/#sfxFree",
+      "sha256": "0c05aeb28b5a795bf1e309f9bc209e00df954af9dd2b2da825b0bc83696bda64"
+    },
+    "mixkit-2600": {
+      "file": "2600.wav",
+      "title": "Electricity static power up",
+      "author": "Mixkit",
+      "source": "https://mixkit.co/free-sound-effects/download/2600/?context=item+grid",
+      "download": "https://assets.mixkit.co/active_storage/sfx/2600/2600.wav",
+      "license": "Mixkit Sound Effects Free License",
+      "licenseUrl": "https://mixkit.co/license/#sfxFree",
+      "sha256": "81304648955817c0249091808c3724fcb77b77b9e7deaa2c4cbbc6b4fefd15ad"
+    },
+    "mixkit-2793": {
+      "file": "2793.wav",
+      "title": "Quick magic sword slice",
+      "author": "Mixkit",
+      "source": "https://mixkit.co/free-sound-effects/download/2793/?context=item+grid",
+      "download": "https://assets.mixkit.co/active_storage/sfx/2793/2793.wav",
+      "license": "Mixkit Sound Effects Free License",
+      "licenseUrl": "https://mixkit.co/license/#sfxFree",
+      "sha256": "785c10dd107c35db6dec78ccf123b7badb93215a8a243b05a73c3ae565d3b997"
+    },
+    "mixkit-2788": {
+      "file": "2788.wav",
+      "title": "Sword cutting flesh",
+      "author": "Mixkit",
+      "source": "https://mixkit.co/free-sound-effects/download/2788/?context=item+grid",
+      "download": "https://assets.mixkit.co/active_storage/sfx/2788/2788.wav",
+      "license": "Mixkit Sound Effects Free License",
+      "licenseUrl": "https://mixkit.co/license/#sfxFree",
+      "sha256": "6431d922be41aee9ccc07f9e3b2834db06b6be960865a663e1614f7e34f59a99"
+    },
+    "mixkit-2589": {
+      "file": "2589.wav",
+      "title": "Shot light energy flowing",
+      "author": "Mixkit",
+      "source": "https://mixkit.co/free-sound-effects/download/2589/?context=item+grid",
+      "download": "https://assets.mixkit.co/active_storage/sfx/2589/2589.wav",
+      "license": "Mixkit Sound Effects Free License",
+      "licenseUrl": "https://mixkit.co/license/#sfxFree",
+      "sha256": "e6e387e65da2903534bfe17b7fea7731049113edd3d666bd328eec5f295a0ead"
+    },
+    "mixkit-1491": {
+      "file": "1491.wav",
+      "title": "Arrow whoosh",
+      "author": "Mixkit",
+      "source": "https://mixkit.co/free-sound-effects/download/1491/?context=item+grid",
+      "download": "https://assets.mixkit.co/active_storage/sfx/1491/1491.wav",
+      "license": "Mixkit Sound Effects Free License",
+      "licenseUrl": "https://mixkit.co/license/#sfxFree",
+      "sha256": "c9aa08de97e5a1235f9b2b4eb7a1096f2fe09586995859e46aa83e9066badca2"
+    },
+    "mixkit-2804": {
+      "file": "2804.wav",
+      "title": "Bomb drop impact",
+      "author": "Mixkit",
+      "source": "https://mixkit.co/free-sound-effects/download/2804/?context=item+grid",
+      "download": "https://assets.mixkit.co/active_storage/sfx/2804/2804.wav",
+      "license": "Mixkit Sound Effects Free License",
+      "licenseUrl": "https://mixkit.co/license/#sfxFree",
+      "sha256": "50928189c96c6f06c78f8f9be7b98f3e0015a26f212c7ddc29e0a72a16fabc53"
+    },
+    "mixkit-877": {
+      "file": "877.wav",
+      "title": "Healing water spell with deep hit",
+      "author": "Mixkit",
+      "source": "https://mixkit.co/free-sound-effects/download/877/?context=item+grid",
+      "download": "https://assets.mixkit.co/active_storage/sfx/877/877.wav",
+      "license": "Mixkit Sound Effects Free License",
+      "licenseUrl": "https://mixkit.co/license/#sfxFree",
+      "sha256": "ce0da16d048dad829c5ed19f9c710e8406b71b1b1675ab3c17bec0846b02e5f2"
+    },
+    "mixkit-2599": {
+      "file": "2599.wav",
+      "title": "Heavy electric shockwave impact",
+      "author": "Mixkit",
+      "source": "https://mixkit.co/free-sound-effects/download/2599/?context=item+grid",
+      "download": "https://assets.mixkit.co/active_storage/sfx/2599/2599.wav",
+      "license": "Mixkit Sound Effects Free License",
+      "licenseUrl": "https://mixkit.co/license/#sfxFree",
+      "sha256": "e4b4a658a77136544978137b3760ea1b6c959c455641142466edc7d146ca61c4"
+    },
+    "pixabay-146419": {
+      "file": "dennish18-arrow-body-impact-146419.mp3",
+      "title": "Arrow Body Impact",
+      "author": "DennisH18",
+      "source": "https://pixabay.com/sound-effects/film-special-effects-arrow-body-impact-146419/",
+      "license": "Pixabay Content License",
+      "licenseUrl": "https://pixabay.com/service/license-summary/",
+      "sha256": "edd022d088846ac305cd85df3f301e17a1f1b39d1ec258d97bf0f5c09017dc5b"
+    },
+    "pixabay-101936": {
+      "file": "freesound_community-bow-release-bow-and-arrow-4-101936.mp3",
+      "title": "Bow Release (Bow and Arrow) 4",
+      "author": "Ali_6868 (Freesound), uploaded by freesound_community",
+      "source": "https://pixabay.com/sound-effects/film-special-effects-bow-release-bow-and-arrow-4-101936/",
+      "license": "Pixabay Content License",
+      "licenseUrl": "https://pixabay.com/service/license-summary/",
+      "sha256": "0c62e08c243fd423683dedcbfccbb0a169b0cf6b78a6dac4e6bca778dab370c3"
+    },
+    "pixabay-228342": {
+      "file": "rescopicsound-elemental-magic-spell-impact-outgoing-228342.mp3",
+      "title": "Elemental Magic Spell Impact Outgoing",
+      "author": "RescopicSound",
+      "source": "https://pixabay.com/sound-effects/film-special-effects-elemental-magic-spell-impact-outgoing-228342/",
+      "license": "Pixabay Content License",
+      "licenseUrl": "https://pixabay.com/service/license-summary/",
+      "sha256": "02ab5c0879fe6ed60ee4b458bc500341ef1e385cd311bd86c00de165b94c1dc6"
+    },
+    "pixabay-88839": {
+      "file": "freesound_community-arrow-release-and-hit-88839.mp3",
+      "title": "Arrow Release and Hit",
+      "author": "calvarychurchatlanta (Freesound), uploaded by freesound_community",
+      "source": "https://pixabay.com/sound-effects/film-special-effects-arrow-release-and-hit-88839/",
+      "license": "Pixabay Content License",
+      "licenseUrl": "https://pixabay.com/service/license-summary/",
+      "sha256": "fe804be22c5a8a6ad549647de8971612642bb3c4bf7c5903e019a026f41719b8"
+    },
+    "pixabay-307490": {
+      "file": "49053354-arrow-hit-307490.mp3",
+      "title": "Arrow Hit",
+      "author": "Creator name not displayed on the source page at download",
+      "source": "https://pixabay.com/sound-effects/film-special-effects-arrow-hit-307490/",
+      "license": "Pixabay Content License",
+      "licenseUrl": "https://pixabay.com/service/license-summary/",
+      "sha256": "6e47167b1d40bf59d7de7653f753fa8a4153268081cec6ad56a27aae1012f99e"
+    },
+    "mixkit-2771": {
+      "file": "2771.wav",
+      "title": "Arrow shot through air",
+      "author": "Mixkit",
+      "source": "https://mixkit.co/free-sound-effects/arrow/",
+      "download": "https://assets.mixkit.co/active_storage/sfx/2771/2771.wav",
+      "license": "Mixkit Sound Effects Free License",
+      "licenseUrl": "https://mixkit.co/license/#sfxFree",
+      "sha256": "7e488e8542a95a459984a1f05ddbdb782cde601d37c3571d0af1a06844abec2b"
+    }
+  },
+  "clips": [
+    {
+      "id": "elf-bow",
+      "source": "pixabay-101936",
+      "start": 0.37,
+      "duration": 0.58,
+      "rate": 1,
+      "lowpassHz": 9000
+    },
+    {
+      "id": "arrow-body",
+      "source": "pixabay-146419",
+      "start": 0.385,
+      "duration": 0.18,
+      "rate": 1,
+      "lowpassHz": 8500
+    },
+    {
+      "id": "elemental-cast",
+      "source": "pixabay-228342",
+      "start": 0.05,
+      "duration": 0.55,
+      "rate": 1,
+      "lowpassHz": 6500
+    },
+    {
+      "id": "elemental-hit",
+      "source": "pixabay-228342",
+      "start": 0.385,
+      "duration": 0.52,
+      "rate": 0.92,
+      "lowpassHz": 6200
+    },
+    {
+      "id": "arrow-air",
+      "source": "mixkit-1491",
+      "start": 0.22,
+      "duration": 0.5,
+      "rate": 1,
+      "lowpassHz": 10000
+    },
+    {
+      "id": "rapier-cut",
+      "source": "mixkit-2158",
+      "start": 0.045,
+      "duration": 0.42,
+      "rate": 1.14,
+      "lowpassHz": 11000
+    },
+    {
+      "id": "blade-flesh",
+      "source": "mixkit-2788",
+      "start": 0.07,
+      "duration": 0.46,
+      "rate": 1,
+      "lowpassHz": 10000
+    },
+    {
+      "id": "armor-strike",
+      "source": "mixkit-2765",
+      "start": 0.085,
+      "duration": 0.55,
+      "rate": 1,
+      "lowpassHz": 9500
+    },
+    {
+      "id": "enchanted-blade",
+      "source": "mixkit-2793",
+      "start": 0.065,
+      "duration": 0.55,
+      "rate": 0.94,
+      "lowpassHz": 6500
+    },
+    {
+      "id": "wind-flight",
+      "source": "mixkit-2610",
+      "start": 0.075,
+      "duration": 1.35,
+      "rate": 1,
+      "lowpassHz": 8000
+    },
+    {
+      "id": "wind-land",
+      "source": "mixkit-2610",
+      "start": 0.43,
+      "duration": 0.48,
+      "rate": 0.9,
+      "lowpassHz": 7000
+    },
+    {
+      "id": "wind-gale",
+      "source": "mixkit-2610",
+      "start": 0.32,
+      "duration": 1.25,
+      "rate": 0.8,
+      "lowpassHz": 6500
+    },
+    {
+      "id": "ice-cast",
+      "source": "mixkit-881",
+      "start": 0.49,
+      "duration": 0.63,
+      "rate": 1,
+      "lowpassHz": 7500
+    },
+    {
+      "id": "ice-hit",
+      "source": "mixkit-882",
+      "start": 0.57,
+      "duration": 0.58,
+      "rate": 0.93,
+      "lowpassHz": 8000
+    },
+    {
+      "id": "electric-cast",
+      "source": "mixkit-2600",
+      "start": 0.55,
+      "duration": 0.52,
+      "rate": 1.08,
+      "lowpassHz": 6800
+    },
+    {
+      "id": "electric-hit",
+      "source": "mixkit-2599",
+      "start": 3.81,
+      "duration": 0.64,
+      "rate": 1,
+      "lowpassHz": 6500
+    },
+    {
+      "id": "fire-cast",
+      "source": "mixkit-1338",
+      "start": 0.54,
+      "duration": 0.5,
+      "rate": 1,
+      "lowpassHz": 7000
+    },
+    {
+      "id": "fire-hit",
+      "source": "mixkit-1338",
+      "start": 0.213,
+      "duration": 1.0,
+      "rate": 1,
+      "lowpassHz": 7000
+    },
+    {
+      "id": "shell-hit",
+      "source": "mixkit-1694",
+      "start": 0.015,
+      "duration": 0.95,
+      "rate": 1,
+      "lowpassHz": 10000
+    },
+    {
+      "id": "mortar-hit",
+      "source": "mixkit-2804",
+      "start": 2.02,
+      "duration": 1.45,
+      "rate": 1,
+      "lowpassHz": 9500
+    },
+    {
+      "id": "holy-field",
+      "source": "mixkit-877",
+      "start": 1.13,
+      "duration": 1.6,
+      "rate": 0.88,
+      "lowpassHz": 3800
+    },
+    {
+      "id": "light-burst",
+      "source": "mixkit-2589",
+      "start": 1.7,
+      "duration": 0.9,
+      "rate": 0.92,
+      "lowpassHz": 5500
+    },
+    {
+      "id": "wind-fall",
+      "source": "mixkit-2610",
+      "start": 1.25,
+      "duration": 1.6,
+      "rate": 0.72,
+      "lowpassHz": 5000
+    },
+    {
+      "id": "hero-bow-wind",
+      "source": "pixabay-88839",
+      "start": 0.304,
+      "duration": 0.183,
+      "rate": 1,
+      "lowpassHz": 6200,
+      "highpassHz": 170,
+      "attackSeconds": 0.004,
+      "layers": [
+        {
+          "source": "mixkit-2610",
+          "start": 0.36,
+          "duration": 0.29,
+          "rate": 1.2,
+          "lowpassHz": 4800,
+          "highpassHz": 600,
+          "gain": 0.12,
+          "offset": 0.022
+        }
+      ]
+    },
+    {
+      "id": "hero-arrow-soft",
+      "source": "pixabay-307490",
+      "start": 0.137,
+      "duration": 0.31,
+      "rate": 1.08,
+      "lowpassHz": 3100,
+      "highpassHz": 190,
+      "attackSeconds": 0.003,
+      "layers": [
+        {
+          "source": "mixkit-1491",
+          "start": 0.3,
+          "duration": 0.13,
+          "rate": 1.15,
+          "lowpassHz": 4200,
+          "highpassHz": 850,
+          "gain": 0.065,
+          "offset": 0.008
+        }
+      ]
+    },
+    {
+      "id": "hero-contact-dry",
+      "source": "pixabay-88839",
+      "start": 0.496,
+      "duration": 0.19,
+      "rate": 1,
+      "lowpassHz": 4400,
+      "highpassHz": 150,
+      "attackSeconds": 0.003
+    },
+    {
+      "id": "arcane-missile-launch",
+      "source": "mixkit-2589",
+      "start": 1.7,
+      "duration": 0.58,
+      "rate": 1.08,
+      "lowpassHz": 4800,
+      "highpassHz": 160,
+      "layers": [
+        {
+          "source": "mixkit-2610",
+          "start": 0.075,
+          "duration": 0.58,
+          "rate": 1.1,
+          "lowpassHz": 5600,
+          "highpassHz": 240,
+          "gain": 0.5,
+          "offset": 0.035
+        }
+      ]
+    },
+    {
+      "id": "arcane-missile-hit",
+      "source": "pixabay-228342",
+      "start": 0.385,
+      "duration": 0.52,
+      "rate": 0.88,
+      "lowpassHz": 4600,
+      "highpassHz": 90,
+      "layers": [
+        {
+          "source": "mixkit-2599",
+          "start": 3.81,
+          "duration": 0.48,
+          "rate": 1.08,
+          "lowpassHz": 3400,
+          "gain": 0.3,
+          "offset": 0
+        }
+      ]
+    },
+    {
+      "id": "tower-arrow-release",
+      "source": "mixkit-2771",
+      "start": 0.095,
+      "duration": 0.29,
+      "rate": 1,
+      "lowpassHz": 8500,
+      "highpassHz": 100,
+      "attackSeconds": 0.001
+    },
+    {
+      "id": "judgment-strike",
+      "source": "mixkit-2599",
+      "start": 3.81,
+      "duration": 0.54,
+      "rate": 1.05,
+      "lowpassHz": 8000,
+      "highpassHz": 140,
+      "attackSeconds": 0.001,
+      "layers": [
+        {
+          "source": "mixkit-2600",
+          "start": 0.55,
+          "duration": 0.32,
+          "rate": 1.18,
+          "lowpassHz": 9000,
+          "highpassHz": 650,
+          "gain": 0.38,
+          "offset": 0.012
+        }
+      ]
+    }
+  ]
+}

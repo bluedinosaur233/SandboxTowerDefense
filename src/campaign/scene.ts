@@ -77,13 +77,14 @@ export class CampaignScene {
     this.controls=new OrbitControls(this.camera,renderer.domElement);this.controls.enableDamping=true;this.controls.dampingFactor=.085;this.controls.enableRotate=false;this.controls.screenSpacePanning=false;this.controls.minZoom=.7;this.controls.maxZoom=9;
     this.controls.mouseButtons={LEFT:THREE.MOUSE.PAN,MIDDLE:THREE.MOUSE.PAN,RIGHT:THREE.MOUSE.PAN};this.controls.touches={ONE:THREE.TOUCH.PAN,TWO:THREE.TOUCH.DOLLY_PAN};this.controls.addEventListener('start',()=>this.focusTarget=null);this.reset();this.controls.enabled=false;
   }
-  reset(){this.focusTarget=null;this.controls.enableDamping=false;this.controls.update();this.controls.target.set(-30,0,-15);this.camera.position.copy(this.controls.target).add(new THREE.Vector3(40,660,760));this.camera.zoom=1;this.camera.updateProjectionMatrix();this.controls.update();this.controls.enableDamping=true;}
+  reset(){this.focusTarget=null;this.controls.enableDamping=false;this.controls.update();this.controls.target.set(-30,0,-15);this.camera.position.copy(this.controls.target).add(new THREE.Vector3(40,660,760));this.camera.zoom=1.22;this.camera.updateProjectionMatrix();this.controls.update();this.controls.enableDamping=true;}
+  freeze(){this.focusTarget=null;this.controls.enableDamping=false;this.controls.update();this.controls.enableDamping=true;}
   resize(width:number,height:number){const aspect=width/height,extent=Math.max(337,465/aspect),shift=width<=580?-extent*.2:0;this.camera.left=-extent*aspect;this.camera.right=extent*aspect;this.camera.top=extent+shift;this.camera.bottom=-extent+shift;this.camera.updateProjectionMatrix();}
-  focus(id:MapId){const stage=STAGES.find(n=>n.id===id)!;this.focusTarget=new THREE.Vector3(stage.x*.48,0,stage.z*.45);this.camera.zoom=1;this.camera.updateProjectionMatrix();}
+  focus(id:MapId){const stage=STAGES.find(n=>n.id===id)!;this.focusTarget=new THREE.Vector3(stage.x*.48,0,stage.z*.45);}
   explore(index:number){const region=REGIONS[index];if(!region)return;const capital=atlasSettlements().find(s=>s.region===index&&s.capital),x=capital?.x??region.x,z=capital?.z??region.z;this.focusTarget=new THREE.Vector3(x,sampleContinent(x,z).h*.45,z-15);this.camera.zoom=2.8;this.camera.updateProjectionMatrix();}
   zoom(delta:number){this.camera.zoom=THREE.MathUtils.clamp(this.camera.zoom*delta,.7,9);this.camera.updateProjectionMatrix();}
   project(x:number,z:number,y=sampleContinent(x,z).h){const p=new THREE.Vector3(x,y,z).project(this.camera);const rect=this.renderer.domElement.getBoundingClientRect();return {x:(p.x+1)*rect.width/2,y:(1-p.y)*rect.height/2,visible:p.z>=-1&&p.z<=1&&Math.abs(p.x)<1&&Math.abs(p.y)<1};}
-  render(time:number,selected:MapId){
+  render(time:number,selected:MapId|null){
     const dt=Math.min(.05,Math.max(0,time-this.clock));this.clock=time;
     if(this.focusTarget){const delta=this.focusTarget.clone().sub(this.controls.target).multiplyScalar(1-Math.exp(-dt*5));this.camera.position.add(delta);this.controls.target.add(delta);if(delta.length()<.01)this.focusTarget=null;}
     this.controls.update();const clamped=this.controls.target.clone();clamped.x=THREE.MathUtils.clamp(clamped.x,-435,445);clamped.z=THREE.MathUtils.clamp(clamped.z,-300,300);clamped.y=THREE.MathUtils.clamp(clamped.y,0,80);this.camera.position.add(clamped.clone().sub(this.controls.target));this.controls.target.copy(clamped);

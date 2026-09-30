@@ -3,7 +3,7 @@ export type CampaignProgress=Partial<Record<MapId,number>>;
 export const PROGRESS_KEY='riverwatch.campaign.v1';
 export function readProgress(raw:string|null):CampaignProgress{
   try{const data=JSON.parse(raw??'{}');const result:CampaignProgress={};
-    for(const id of ['river','mountain','canyon'] as const){const n=data?.[id];if(Number.isInteger(n)&&n>=1&&n<=3)result[id]=n;}
+    for(const id of ['windford'] as const){const n=data?.[id];if(Number.isInteger(n)&&n>=1&&n<=3)result[id]=n;}
     return result;
   }catch{return {};}
 }

@@ -9,15 +9,13 @@ export const HEIGHT_STEP=.75;
 export const BEDROCK=-14;
 export const worldPoint=(x:number,z:number)=>({x:x*ATLAS_SCALE,z:z*ATLAS_SCALE});
 export const STAGES: {id:MapId;number:string;x:number;z:number;region:string}[]=[
-  {id:'river' as MapId,number:'01',x:-24,z:13,region:'暮河原野'},
-  {id:'mountain' as MapId,number:'02',x:-48,z:-43,region:'霜脊山脉'},
-  {id:'canyon' as MapId,number:'03',x:48,z:-3,region:'风裂断崖'},
+  {id:'windford' as MapId,number:'01',x:-12,z:22,region:'暮河原野'},
 ].map(stage=>({...stage,...worldPoint(stage.x,stage.z)}));
 export const REGIONS=[
   {name:'霜脊山脉',subtitle:'THE FROSTWARD',x:-34,z:-67,detail:'连绵雪峰、冰川与蜿蜒山口，暮河的源头藏在群山之间。'},
   {name:'碎冰峡湾',subtitle:'SHATTERED FJORDS',x:-99,z:-51,detail:'冰海切入嶙峋海岸，孤立雪岛与灯塔守望北境航道。'},
   {name:'翡翠密林',subtitle:'THE EMERALD WILD',x:-78,z:-5,detail:'古老针叶林围绕巨树生长，林间留有石环与精灵遗迹。'},
-  {name:'暮河原野',subtitle:'RIVERWATCH',x:-27,z:31,detail:'河流穿过起伏牧场、风车与村庄，古道连接边境的三座要塞。'},
+  {name:'暮河原野',subtitle:'RIVERWATCH',x:-27,z:31,detail:'河流穿过起伏牧场、风车与村庄，风渡前哨守望通向镜湖的旧渡口。'},
   {name:'紫雾湿地',subtitle:'THE VIOLET FEN',x:-73,z:49,detail:'紫色苔地与浅潭交错，芦苇、枯木和半沉的遗迹隐入水泽。'},
   {name:'镜湖盆地',subtitle:'LAKE MIRRORMERE',x:-5,z:53,detail:'宽阔内陆湖承接群山来水，湖心小岛与渔港点缀蓝色水面。'},
   {name:'白垩海崖',subtitle:'THE IVORY COAST',x:23,z:80,detail:'白色阶崖高出南海，河水沿岩壁倾泻，古老水道桥横跨山谷。'},
@@ -112,6 +110,6 @@ export function sampleContinent(x:number,z:number):Geography{
   return {...t,h:t.biome==='sea'?BEDROCK:Math.max(HEIGHT_STEP,Math.round(t.h*2.4/HEIGHT_STEP)*HEIGHT_STEP)};
 }
 export const ROUTES=[
-  [[-24,13],[-35,6],[-45,-8],[-55,-24],[-48,-43]],
+  [[-12,22],[-24,13],[-35,6],[-45,-8],[-55,-24],[-48,-43]],
   [[-48,-43],[-30,-29],[-14,-24],[5,-23],[26,-25],[40,-22],[48,-3]],
 ].map(route=>route.map(([x,z])=>[x*ATLAS_SCALE,z*ATLAS_SCALE]));
