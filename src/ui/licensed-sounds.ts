@@ -5,6 +5,8 @@ const sound = (cue:AudioCue, file:string, gain:number, duration:number, rate=1):
 
 // Optional local pack. Keep originals out of the source repository; see docs/audio/README.md.
 export const LICENSED_SOUNDS:Partial<Record<AudioCue,SoundDefinition>>={
+  'boss-arrival':sound('boss-arrival','grom-warcry',.4,2.8),
+  'boss-rage':sound('boss-rage','grom-rage',.43,2.5),
   // Hero release intentionally uses the original bundled swing-2.wav profile.
   'hero-hit':sound('hero-hit','hero-contact-dry',.16,.2),
   'hero-rapier':sound('hero-rapier','rapier-cut',.24,.45),

@@ -38,7 +38,7 @@ test('combat actions queue sound cues for the Web Audio adapter',()=>{
 });
 test('music credits identify locally bundled CC BY 4.0 licensed recordings',()=>{
   assert.ok(TRACKS.length>=6);assert.ok(TRACKS.some(x=>x.title==='Celtic Impulse'));
-  for(const track of TRACKS){assert.ok(track.file.endsWith('.mp3'));assert.ok(track.isrc.startsWith('US'));}
+  for(const track of TRACKS){assert.ok(track.file.endsWith('.m4a'));assert.ok(track.isrc.startsWith('US'));}
 });
 
 test('bridge geometry opens railings toward connected tiles',async()=>{

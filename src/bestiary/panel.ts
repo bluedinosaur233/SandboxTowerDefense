@@ -13,6 +13,8 @@ export class BestiaryPanel {
   private snoozed=new Set<EnemyKind>();
   private returnFocus:HTMLElement|null=null;
   private noticeAllowed=true;
+  private noticeKind:EnemyKind|undefined;
+  private noticeElapsed=0;
   constructor(private onOpen:()=>void,private onClose:()=>void,private sound:()=>void){
     try{this.journal=readJournal(localStorage.getItem(BESTIARY_KEY));}catch{/* Keep an in-memory journal. */}
     this.dialog.className='bestiary';this.dialog.setAttribute('aria-labelledby','bestiary-title');
@@ -27,15 +29,22 @@ export class BestiaryPanel {
   get open(){return this.dialog.open;}
   private save(){try{localStorage.setItem(BESTIARY_KEY,JSON.stringify(this.journal));}catch{/* Session discoveries are still usable. */}}
   known(kind:EnemyKind){return this.journal.known.includes(kind);}
-  beginBattle(){this.encounters.reset();this.snoozed.clear();this.renderNotice();}
+  beginBattle(){this.noticeKind=undefined;this.noticeElapsed=0;this.encounters.reset();this.snoozed.clear();this.renderNotice();}
   record(kinds:EnemyKind[]){
     let changed=false;for(const kind of kinds){discover(this.journal,kind);changed=this.encounters.record(kind)||changed;}
     if(changed){this.save();this.renderNotice();}
   }
   setNoticeVisible(visible:boolean){this.noticeAllowed=visible;this.notice.hidden=!visible||!this.pending();}
+  update(dt:number){
+    if(this.notice.hidden||this.open||this.notice.matches(':hover')||this.notice.contains(document.activeElement))return;
+    this.noticeElapsed+=dt;
+    this.notice.classList.toggle('retiring',this.noticeElapsed>=7.65);
+    if(this.noticeElapsed>=8){const kind=this.pending();if(kind)this.snoozed.add(kind);this.renderNotice();}
+  }
   private pending(){return this.encounters.unread.find(kind=>!this.snoozed.has(kind));}
   private renderNotice(){
     const kind=this.pending();
+    if(kind!==this.noticeKind){this.noticeKind=kind;this.noticeElapsed=0;this.notice.classList.remove('retiring');}
     this.notice.hidden=!this.noticeAllowed||!kind;
     for(const button of document.querySelectorAll<HTMLElement>('[data-bestiary-open]')){
       button.dataset.unread=String(this.encounters.unread.length);button.classList.toggle('has-intel',this.encounters.unread.length>0);

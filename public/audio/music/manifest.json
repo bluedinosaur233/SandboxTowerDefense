@@ -1,62 +1,80 @@
 [
   {
-    "file": "skye-cuillin.mp3",
+    "file": "skye-cuillin.m4a",
     "title": "Skye Cuillin",
     "author": "Kevin MacLeod",
     "isrc": "USUAN1100346",
     "license": "CC-BY-4.0",
     "source": "https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100346",
     "download": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Skye%20Cuillin.mp3",
-    "sha256": "9edd236cfe08d0a339f2e6e096689d2940ae633a05855dd106cc2eba295dd367"
+    "sha256": "ca8c0e96c5595cdd18c02819f06bf323992930c4c4c939600090c51607ab5615",
+    "originalFile": "skye-cuillin.mp3",
+    "originalSha256": "9edd236cfe08d0a339f2e6e096689d2940ae633a05855dd106cc2eba295dd367",
+    "processing": "AAC-LC stereo, 64 kbps / 32 kHz, fast-start M4A for progressive public playback"
   },
   {
-    "file": "ascending-the-vale.mp3",
+    "file": "ascending-the-vale.m4a",
     "title": "Ascending the Vale",
     "author": "Kevin MacLeod",
     "isrc": "USUAN1600064",
     "license": "CC-BY-4.0",
     "source": "https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1600064",
     "download": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Ascending%20the%20Vale.mp3",
-    "sha256": "a0ab3aae9a942d797c381df8d914dfef453e7e455c1c6333d1916d59ba005353"
+    "sha256": "443b834383c0b1136d406582300f19aa1312902646575b51449d60eff4520096",
+    "originalFile": "ascending-the-vale.mp3",
+    "originalSha256": "a0ab3aae9a942d797c381df8d914dfef453e7e455c1c6333d1916d59ba005353",
+    "processing": "AAC-LC stereo, 64 kbps / 32 kHz, fast-start M4A for progressive public playback"
   },
   {
-    "file": "celtic-impulse.mp3",
+    "file": "celtic-impulse.m4a",
     "title": "Celtic Impulse",
     "author": "Kevin MacLeod",
     "isrc": "USUAN1100297",
     "license": "CC-BY-4.0",
     "source": "https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100297",
     "download": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Celtic%20Impulse.mp3",
-    "sha256": "25db9b02ceb9875234f323cc89d38dcdbff2f0bb232d1dd0f662aa9ca5eddd8f"
+    "sha256": "fb59eae2efaf8deaeb540856ef26626f58fed7ed81fc35ef0e5df254d8877dde",
+    "originalFile": "celtic-impulse.mp3",
+    "originalSha256": "25db9b02ceb9875234f323cc89d38dcdbff2f0bb232d1dd0f662aa9ca5eddd8f",
+    "processing": "AAC-LC stereo, 64 kbps / 32 kHz, fast-start M4A for progressive public playback"
   },
   {
-    "file": "lord-of-the-land.mp3",
+    "file": "lord-of-the-land.m4a",
     "title": "Lord of the Land",
     "author": "Kevin MacLeod",
     "isrc": "USUAN1400022",
     "license": "CC-BY-4.0",
     "source": "https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1400022",
     "download": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Lord%20of%20the%20Land.mp3",
-    "sha256": "47ce185fdc1f2e5514566307d652d6cb62a06bed47ea730e28214d3cedc2f948"
+    "sha256": "67af1932216b2df3cb86a120402974ace98f542f49ae70a78a1d63ac26472724",
+    "originalFile": "lord-of-the-land.mp3",
+    "originalSha256": "47ce185fdc1f2e5514566307d652d6cb62a06bed47ea730e28214d3cedc2f948",
+    "processing": "AAC-LC stereo, 64 kbps / 32 kHz, fast-start M4A for progressive public playback"
   },
   {
-    "file": "folk-round.mp3",
+    "file": "folk-round.m4a",
     "title": "Folk Round",
     "author": "Kevin MacLeod",
     "isrc": "USUAN1100357",
     "license": "CC-BY-4.0",
     "source": "https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100357",
     "download": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Folk%20Round.mp3",
-    "sha256": "b4e6aa7d67bb05a269b6f916662355358b6e849d29b81f5185f211a31fdb8051"
+    "sha256": "2c51affc573459500a4ac1b74a8769b499253c8220f720fef46ce206935e10e3",
+    "originalFile": "folk-round.mp3",
+    "originalSha256": "b4e6aa7d67bb05a269b6f916662355358b6e849d29b81f5185f211a31fdb8051",
+    "processing": "AAC-LC stereo, 64 kbps / 32 kHz, fast-start M4A for progressive public playback"
   },
   {
-    "file": "the-pyre.mp3",
+    "file": "the-pyre.m4a",
     "title": "The Pyre",
     "author": "Kevin MacLeod",
     "isrc": "USUAN1100846",
     "license": "CC-BY-4.0",
     "source": "https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100846",
     "download": "https://incompetech.com/music/royalty-free/mp3-royaltyfree/The%20Pyre.mp3",
-    "sha256": "3333c6b26dbe96a275051bb4d9089a803e664aefd317c1b5a8118c16fb533179"
+    "sha256": "5a354bdd80f04b7fb830c39ed12ed2be1532b56ef4b12433ee4630a3d2593274",
+    "originalFile": "the-pyre.mp3",
+    "originalSha256": "3333c6b26dbe96a275051bb4d9089a803e664aefd317c1b5a8118c16fb533179",
+    "processing": "AAC-LC stereo, 64 kbps / 32 kHz, fast-start M4A for progressive public playback"
   }
 ]

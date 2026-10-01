@@ -77,9 +77,9 @@ test('a damaged operating site can be repaired for less than rebuilding, without
 test('Windford opening five waves remain survivable with normal resources and investment',()=>{
   const g=new Game();
   const plans=[
-    [{kind:'archer',x:34,z:40},{kind:'barracks',x:35,z:40},{kind:'frost',x:58,z:44}],
-    [{kind:'mage',x:52,z:36},{kind:'archer',x:56,z:36}],
-    [{kind:'cannon',x:59,z:46},{kind:'mage',x:56,z:47}],
+    [{kind:'archer',x:35,z:39},{kind:'barracks',x:37,z:39},{kind:'frost',x:58,z:44}],
+    [{kind:'mage',x:52,z:36},{kind:'archer',x:57,z:37}],
+    [{kind:'cannon',x:58,z:47},{kind:'mage',x:55,z:47}],
     [{kind:'tesla',x:59,z:41}],[],
   ] as const;
   assert.ok(g.restoreOutpost('westfield'));

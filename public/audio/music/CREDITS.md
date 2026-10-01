@@ -10,6 +10,6 @@ Licensed under **Creative Commons: By Attribution 4.0**: https://creativecommons
 - "Folk Round" Kevin MacLeod (incompetech.com). [Source](https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100357) · [Original MP3](https://incompetech.com/music/royalty-free/mp3-royaltyfree/Folk%20Round.mp3).
 - "The Pyre" Kevin MacLeod (incompetech.com). [Source](https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100846) · [Original MP3](https://incompetech.com/music/royalty-free/mp3-royaltyfree/The%20Pyre.mp3).
 
-Original recordings bundled unmodified from the composer’s official website; first two downloaded 2026-09-25, additions 2026-09-29. Playback adjusts volume and cycles through scene playlists. CC BY 4.0 permits commercial use and redistribution with attribution. No endorsement by the composer is implied.
+Recordings sourced from the composer’s official website; first two downloaded 2026-09-25, additions 2026-09-29. On 2026-10-01, runtime copies were transcoded to stereo AAC-LC at 64 kbps / 32 kHz in M4A containers with metadata before audio data for faster progressive playback. Composition and duration are unchanged. The manifest retains both original download and converted-file SHA-256 hashes. Playback adjusts volume and cycles through scene playlists. CC BY 4.0 permits commercial use and redistribution with attribution. No endorsement by the composer is implied.
 
 Sound effects have separate [credits and licenses](../sfx/CREDITS.md).

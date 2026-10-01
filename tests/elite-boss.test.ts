@@ -2,13 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { Game } from '../src/simulation/game';
-import { ENEMIES, waveEnemies, BOSS_SLAM } from '../src/simulation/enemies';
+import { ENEMIES, waveEnemies, BOSS_SLAM, BOSS_ENTRANCE } from '../src/simulation/enemies';
 import { unitModel } from '../src/render/units';
-import { BossWarning } from '../src/render/boss-effects';
+import { BossWarning, BossPresence, animateBoss, bossArrivalPose } from '../src/render/boss-effects';
 import { createElfModel } from '../src/heroes/model';
 import { HERO_SHOT } from '../src/simulation/hero';
 import { SOUND_LIBRARY } from '../src/ui/sound-library';
 import { LICENSED_SOUNDS } from '../src/ui/licensed-sounds';
+import { BossEntrance, bossEntranceFrame } from '../src/render/boss-entrance';
+import type { World } from '../src/render/world';
 
 function arena(hero=false){
  const g=new Game(false,'windford',hero?'aerilia':null);
@@ -24,7 +26,7 @@ test('three elite upgrades have stronger stats and visibly larger distinct geome
  for(let w=1;w<15;w++)assert.equal(waveEnemies(w,'windford').includes('grom'),false);
 });
 test('boss locks warning location, lands one timed hit, and can be stunned out of the windup',()=>{
- const g=arena(),b=g.spawnEnemy('grom',{x:20,z:20}),wall=g.addStructure('wall',22,20);b.speed=0;b.boss!.cooldown=0;b.cooldown=100;
+ const g=arena(),b=g.spawnEnemy('grom',{x:20,z:20}),wall=g.addStructure('wall',22,20);b.boss!.spawnedAt=-10;b.speed=0;b.boss!.cooldown=0;b.cooldown=100;
  const hp=wall.hp;g.step(.02);assert.ok(b.boss!.center);const center={...b.boss!.center!};assert.equal(wall.hp,hp);
  const fx=new BossWarning();fx.update(g);assert.equal(fx.group.visible,true);assert.ok(fx.group.children.length===2);
  g.paused=true;advance(g,2);assert.equal(wall.hp,hp);assert.deepEqual(b.boss!.center,center);g.paused=false;
@@ -35,9 +37,9 @@ test('boss locks warning location, lands one timed hit, and can be stunned out o
  b.boss!.cooldown=0;g.step(.02);assert.ok(b.boss!.center);b.stunUntil=g.time+2;g.step(.02);assert.equal(b.boss!.center,null);advance(g,1.7);assert.equal(wall.hp,hitHp);
 });
 test('moving out of a boss warning avoids its damage, rage applies once, and a dead boss cannot slam',()=>{
- const g=arena(true),h=g.hero!,b=g.spawnEnemy('grom',{x:22,z:20});b.speed=0;b.cooldown=100;b.boss!.cooldown=0;
+ const g=arena(true),h=g.hero!,b=g.spawnEnemy('grom',{x:22,z:20});b.boss!.spawnedAt=-10;b.speed=0;b.cooldown=100;b.boss!.cooldown=0;
  g.step(.02);assert.ok(b.boss!.center);const hp=h.hp;g.commandHero({x:16,z:20});advance(g,1.7);assert.equal(h.hp,hp);
- b.hp=b.maxHp*.39;g.step(.02);const speed=b.speed,damage=b.damage;assert.ok(b.boss!.enraged);advance(g,.3);assert.equal(b.speed,speed);assert.equal(b.damage,damage);
+ b.hp=b.maxHp*.39;g.step(.02);const speed=b.speed,damage=b.damage;assert.ok(b.boss!.enraged);advance(g,.6);assert.equal(b.speed,speed);assert.equal(b.damage,damage);
  assert.equal(g.soundEvents.filter(s=>s.kind==='boss-rage').length,1);
  b.boss!.center={x:b.x,y:b.y,z:b.z};b.boss!.windupUntil=g.time+.02;b.hp=0;const slams=g.soundEvents.filter(s=>s.kind==='boss-slam').length;g.step(.04);assert.equal(g.soundEvents.filter(s=>s.kind==='boss-slam').length,slams);assert.ok(g.soundEvents.some(s=>s.kind==='boss-death'));
 });
@@ -70,4 +72,52 @@ test('hero arrow windup pauses, commands cancel it, and a dead or occluded targe
 test('electric branches and magic missiles have audible gains and no fire launch timbre',()=>{
  for(const library of [SOUND_LIBRARY,LICENSED_SOUNDS])for(const cue of ['missile','missile-hit','thunder','chain-lightning','judgment'] as const)assert.ok(library[cue]!.gain>=.3);
  assert.ok(LICENSED_SOUNDS.missile!.files[0].includes('arcane-missile'));assert.ok(!SOUND_LIBRARY.missile.files[0].includes('flame'));
+});
+
+test('boss entrance holds attacks and movement, pauses with simulation, then releases the boss',()=>{
+ const g=arena(),b=g.spawnEnemy('grom',{x:20,z:20}),wall=g.addStructure('wall',21,20);
+ const hp=wall.hp;b.boss!.cooldown=0;advance(g,1.6);
+ assert.equal(b.x,20);assert.equal(b.z,20);assert.equal(wall.hp,hp);assert.equal(b.boss!.center,null);
+ const model=unitModel('grom'),fx=new BossPresence();animateBoss(model,b,g.time);fx.update(g);
+ const pose=model.getObjectByName('body')!.position.y;assert.ok(pose<-.35);assert.equal(fx.group.visible,true);
+ g.paused=true;advance(g,3);animateBoss(model,b,g.time);assert.equal(model.getObjectByName('body')!.position.y,pose);
+ g.paused=false;advance(g,BOSS_ENTRANCE);assert.ok(b.boss!.center);animateBoss(model,b,g.time);assert.equal(model.getObjectByName('body')!.position.y,-.35);
+ b.hp=b.maxHp*.39;g.step(.02);fx.update(g);assert.ok(b.boss!.enragedAt!==undefined);assert.equal(fx.group.visible,true);
+ const pool=fx.group.children.length;advance(g,.2);fx.update(g);assert.equal(fx.group.children.length,pool);
+ b.hp=0;fx.update(g);assert.equal(fx.group.visible,false);
+});
+
+test('boss camera sequence hides the actor until focused and restores the exact view and controls',t=>{
+ const classes=new Set<string>();
+ const priorDocument=Object.getOwnPropertyDescriptor(globalThis,'document'),priorMatch=Object.getOwnPropertyDescriptor(globalThis,'matchMedia');
+ Object.defineProperty(globalThis,'document',{configurable:true,value:{body:{classList:{add:(s:string)=>classes.add(s),remove:(s:string)=>classes.delete(s)}}}});
+ Object.defineProperty(globalThis,'matchMedia',{configurable:true,value:()=>({matches:false})});
+ t.after(()=>{for(const [name,prior] of [['document',priorDocument],['matchMedia',priorMatch]] as const)if(prior)Object.defineProperty(globalThis,name,prior);else delete (globalThis as any)[name];});
+ const game=arena(),enemy=game.spawnEnemy('grom',{x:20,z:20}),camera=new THREE.OrthographicCamera(-20,20,20,-20,.1,200);
+ camera.position.set(42,38,40);camera.zoom=1.7;
+ const controls={target:new THREE.Vector3(30,2,30),enabled:true,enableDamping:true,update(){}};
+ const world={game,camera,controls,bossPresentationAge:null} as unknown as World,root={inert:false} as HTMLElement;
+ let prepared=0,revealed=0,sounded=0;const cinematic=new BossEntrance(world,root,()=>prepared++,()=>revealed++,()=>sounded++);
+ const position=camera.position.clone(),target=controls.target.clone(),time=game.time;
+ assert.equal(cinematic.begin(game),true);assert.equal(prepared,1);assert.equal(root.inert,true);assert.equal(controls.enabled,false);assert.equal(world.bossPresentationAge,-1);
+ cinematic.update(.7);assert.equal(sounded,0);assert.ok(world.bossPresentationAge!<0);
+ game.paused=true;const pausedPosition=camera.position.clone();cinematic.update(1);assert.deepEqual(camera.position,pausedPosition);game.paused=false;
+ cinematic.update(1.2);assert.equal(sounded,1);assert.ok(world.bossPresentationAge!>0);assert.equal(game.time,time);
+ cinematic.update(5);assert.equal(cinematic.active,false);assert.deepEqual(camera.position,position);assert.deepEqual(controls.target,target);assert.equal(camera.zoom,1.7);assert.equal(controls.enabled,true);assert.equal(controls.enableDamping,true);assert.equal(root.inert,false);assert.equal(revealed,1);assert.equal(classes.size,0);
+ assert.equal(enemy.boss!.spawnedAt,game.time-BOSS_ENTRANCE);assert.equal(cinematic.begin(game),false);
+ const another=game.spawnEnemy('grom',{x:21,z:20});assert.equal(cinematic.begin(game),true);cinematic.finish();assert.equal(another.boss!.spawnedAt,game.time-BOSS_ENTRANCE);assert.deepEqual(camera.position,position);
+ assert.ok(bossEntranceFrame(1.3).age===0);assert.equal(bossEntranceFrame(7).done,true);assert.equal(bossEntranceFrame(5,true).done,true);
+});
+
+test('hammer falls from above frame before boss, pickup joins the hand without a pop',()=>{
+ const g=arena(),e=g.spawnEnemy('grom',{x:20,z:20}),model=unitModel('grom');
+ assert.ok(Math.abs(e.facing-Math.atan2(g.goal.x-e.x,g.goal.z-e.z))<1e-9);
+ animateBoss(model,e,0,30);assert.equal(model.getObjectByName('body')!.visible,false);assert.ok(model.getObjectByName('arrival-hammer')!.position.y>30);
+ animateBoss(model,e,.6,30);assert.equal(model.getObjectByName('body')!.visible,false);assert.equal(model.getObjectByName('siege hammer')!.visible,false);assert.ok(model.getObjectByName('arrival-hammer')!.position.y<2);
+ animateBoss(model,e,.98,30);assert.ok(model.getObjectByName('body')!.position.y>29);
+ animateBoss(model,e,2.9499,30);model.updateMatrixWorld(true);
+ const falling=model.getObjectByName('arrival-hammer')!,held=model.getObjectByName('siege hammer')!;
+ assert.ok(falling.getWorldPosition(new THREE.Vector3()).distanceTo(held.getWorldPosition(new THREE.Vector3()))<.001);
+ animateBoss(model,e,3,30);assert.equal(falling.visible,false);assert.equal(held.visible,true);
+ assert.ok(bossArrivalPose(1.6).crouch>.95);assert.equal(bossArrivalPose(BOSS_ENTRANCE).bodyHeight,0);
 });

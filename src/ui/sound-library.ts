@@ -4,9 +4,11 @@ export interface SoundDefinition { files: string[]; gain: number; interval: numb
 
 // Sources, original filenames and licenses are recorded in public/audio/sfx.
 export const SOUND_LIBRARY: Record<AudioCue, SoundDefinition> = {
+  'boss-hammer-land':{files:['siege-impact.wav'],gain:.45,interval:.2,rate:.94,duration:1.4},
+  'boss-body-land':{files:['mortar-impact.wav'],gain:.43,interval:.2,rate:.82,duration:1.15},
   'boss-arrival':{files:['giant-1.wav'],gain:.38,interval:4,rate:.72,duration:1.8},
   'boss-windup':{files:['charge.wav'],gain:.30,interval:2,rate:.8,duration:1.4},
-  'boss-slam':{files:['earth-burst.wav'],gain:.42,interval:1,rate:.85,duration:1.3},
+  'boss-slam':{files:['siege-impact.wav'],gain:.42,interval:1,rate:.85,duration:1.3},
   'boss-rage':{files:['giant-2.wav'],gain:.38,interval:8,rate:.78,duration:1.6},
   'boss-death':{files:['giant-5.wav'],gain:.38,interval:3,rate:.7,duration:1.8},
   'cannon':{files:['cannon-fire.ogg'],gain:0.33,interval:0.22,rate:1,duration:0.8},

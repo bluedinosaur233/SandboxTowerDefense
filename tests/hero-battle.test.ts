@@ -142,3 +142,12 @@ test('a stowed bow must be retrieved before ordinary shots or piercing skills; p
     assert.equal(g.soundEvents.filter(e=>e.kind==='hero-arrow').length,0);
   }
 });
+
+test('hero retaliates on a one-step slope instead of endlessly reacquiring an intercept point',()=>{
+  const g=arena(),h=g.hero!;g.phase='battle';g.tile(21,20)!.h=2;
+  Object.assign(h,{x:19.9,z:20,y:g.ground(19.9,20)+.35,rally:{x:19.9,z:20},skillCooldowns:{piercing:100,rain:100,gale:100}});
+  const e=g.spawnEnemy('goblin',{x:21,z:20});Object.assign(e,{hp:2000,maxHp:2000,speed:0,damage:1});
+  advance(g,2);
+  assert.ok(e.hp<2000-HERO_STATS.meleeDamage,'repeated melee attacks must occur even with height difference');
+  assert.ok(h.hp<h.maxHp,'the enemy is close enough to retaliate');
+});

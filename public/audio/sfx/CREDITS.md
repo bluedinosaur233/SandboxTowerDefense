@@ -45,3 +45,5 @@ Earlier recordings remain credited and bundled, but unused samples are not prelo
 ## Optional Pixabay / Mixkit pack — 2026-09-30
 
 The local playable build now prefers 24 active edited clips from 20 source recordings for 46 combat cues (26 prepared clips including comparison versions). These are custom-license recordings, separate from this redistributable fallback collection. Sources and terms: [LICENSED-CREDITS.md](../LICENSED-CREDITS.md). Reproduction instructions: `docs/audio/README.md`.
+
+Runtime delivery copies are AAC-LC mono 32 kHz / 64 kbps clips in content-hashed transport bundles under `/audio/stream/`. Each clip retains its source cue mapping; original recordings and the source manifest remain available for codec fallback. Rebuild with `node --import tsx scripts/audio-stream-sources.ts` then `FFMPEG=/path/to/ffmpeg python3 scripts/prepare-stream-audio.py`.

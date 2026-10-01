@@ -1,4 +1,5 @@
-import { BossWarning } from './boss-effects';
+import { buildingFootprint } from '../simulation/footprint';
+import { BossWarning, BossPresence, animateBoss, animateBossDeath } from './boss-effects';
 import { BOSS_SLAM } from '../simulation/enemies';
 import { towerModel } from './tower-models';
 import { renderSanctuaries } from './barracks-effects';
@@ -150,6 +151,11 @@ export class World {
   aimPoint:Point|null=null;
   showGrid=false;
   private bossWarning=new BossWarning();
+  private bossPresence=new BossPresence();
+  bossPresentationAge:number|null=null;
+  terminalTime=0;
+  onBossDeathImpact:(()=>void)|null=null;
+  private fallenImpacts=new Set<number>();
   heroCommand=false;
   private heroModel:ReturnType<typeof createElfModel>|null=null;
   private heroClock=0;
@@ -173,9 +179,9 @@ export class World {
     this.scene.add(new THREE.HemisphereLight('#fff4d0','#496848',2.2));
     const sun=new THREE.DirectionalLight('#ffe8c4',3.5);sun.position.set(-10,65,45);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-75,right:75,top:75,bottom:-75,near:1,far:200});sun.shadow.normalBias=0.04;sun.shadow.bias=-0.0003;sun.target.position.set(WIDTH/2,0,DEPTH/2);this.scene.add(sun,sun.target);
     this.floor=new THREE.Mesh(new THREE.PlaneGeometry(300,300),mat('#a08e68'));this.floor.rotation.x=-Math.PI/2;this.floor.position.set((WIDTH-1)/2,-3.35,(DEPTH-1)/2);this.floor.receiveShadow=true;this.scene.add(this.floor);
-    this.scene.add(this.bossWarning.group,this.heroRing,this.heroDestination,this.extensionGhosts,this.terrain,this.props,this.structures,this.cursor,this.placementGrid,this.rangeDisplay.group,this.fx,this.wind);
-    this.controls=new OrbitControls(this.camera,this.renderer.domElement);this.controls.enableDamping=true;this.controls.dampingFactor=0.1;this.controls.minPolarAngle=0.3;this.controls.maxPolarAngle=1.22;this.controls.enablePan=true;this.controls.minZoom=0.65;this.controls.maxZoom=10;
-    this.controls.mouseButtons={LEFT:undefined as unknown as THREE.MOUSE,MIDDLE:THREE.MOUSE.PAN,RIGHT:THREE.MOUSE.ROTATE};this.controls.touches={ONE:THREE.TOUCH.PAN,TWO:THREE.TOUCH.DOLLY_ROTATE};
+    this.scene.add(this.bossWarning.group,this.bossPresence.group,this.heroRing,this.heroDestination,this.extensionGhosts,this.terrain,this.props,this.structures,this.cursor,this.placementGrid,this.rangeDisplay.group,this.fx,this.wind);
+    this.controls=new OrbitControls(this.camera,this.renderer.domElement);this.controls.enableDamping=true;this.controls.dampingFactor=0.1;this.controls.minPolarAngle=0.3;this.controls.maxPolarAngle=1.22;this.controls.enablePan=true;this.controls.screenSpacePanning=false;this.controls.minZoom=0.65;this.controls.maxZoom=10;
+    this.controls.mouseButtons={LEFT:THREE.MOUSE.PAN,MIDDLE:THREE.MOUSE.PAN,RIGHT:THREE.MOUSE.ROTATE};this.controls.touches={ONE:THREE.TOUCH.PAN,TWO:THREE.TOUCH.DOLLY_ROTATE};
     this.resetCamera();
     this.castle=castleModel();this.castle.position.set(game.goal.x,game.ground(game.goal.x,game.goal.z),game.goal.z);this.scene.add(this.castle);
     const outline=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.03,0.09,1.03)),new THREE.LineBasicMaterial({color:'#ffeab1',depthTest:false}));this.cursor.add(outline);this.cursor.visible=false;
@@ -184,7 +190,7 @@ export class World {
     this.renderer.domElement.addEventListener('webglcontextrestored',()=>{this.contextLost=false;this.revision=-1;this.game.say('画面已恢复，点击继续以恢复游戏');});
     this.rebuild();this.resize();
   }
-  resetCamera(){this.controls.enableDamping=false;this.controls.update();this.controls.target.set((WIDTH-1)/2,this.game.map.cameraHeight,(DEPTH-1)/2);this.camera.position.copy(this.controls.target).add(new THREE.Vector3(34,39,39));this.camera.zoom=1;this.camera.updateProjectionMatrix();this.controls.update();this.controls.enableDamping=true;}
+  resetCamera(){this.controls.enableDamping=false;this.controls.update();this.controls.target.set((WIDTH-1)/2,this.game.map.cameraHeight,(DEPTH-1)/2);this.camera.position.copy(this.controls.target).add(new THREE.Vector3(34,39,39));this.camera.zoom=1.45;this.camera.updateProjectionMatrix();this.controls.update();this.controls.enableDamping=true;}
   focusFront(index:number){const p=this.game.entrances[index];if(!p)return;const next=new THREE.Vector3((p.x+this.game.goal.x)/2,this.game.map.cameraHeight,(p.z+this.game.goal.z)/2);const delta=next.clone().sub(this.controls.target);this.camera.position.add(delta);this.controls.target.copy(next);this.controls.update();}
   moveCamera(right:number,forward:number,dt:number){
     const direction=this.camera.getWorldDirection(new THREE.Vector3());
@@ -194,7 +200,7 @@ export class World {
     this.camera.position.x+=x;this.camera.position.z+=z;this.controls.target.x+=x;this.controls.target.z+=z;
   }
   resize(){const w=this.host.clientWidth,h=this.host.clientHeight,aspect=w/h,vertical=Math.max(43,57/aspect);this.camera.left=-vertical*aspect;this.camera.right=vertical*aspect;this.camera.top=vertical;this.camera.bottom=-vertical;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h);}
-  setGame(game:Game){this.heroModel?.dispose();this.heroModel=null;this.heroClock=0;this.heroDefeatTime=0;this.heroRing.visible=false;this.heroDestination.visible=false;this.setHeroCommand(false);this.rangeDisplay.hide();this.damageVisibility.clear();this.game=game;this.floor.position.y=-3.35;this.castle.position.set(game.goal.x,game.ground(game.goal.x,game.goal.z),game.goal.z);this.revision=-1;for(const m of this.unitMeshes.values())this.scene.remove(m);this.unitMeshes.clear();this.selection=null;}
+  setGame(game:Game){this.terminalTime=0;this.fallenImpacts.clear();this.heroModel?.dispose();this.heroModel=null;this.heroClock=0;this.heroDefeatTime=0;this.heroRing.visible=false;this.heroDestination.visible=false;this.setHeroCommand(false);this.rangeDisplay.hide();this.damageVisibility.clear();this.game=game;this.floor.position.y=-3.35;this.castle.position.set(game.goal.x,game.ground(game.goal.x,game.goal.z),game.goal.z);this.revision=-1;for(const m of this.unitMeshes.values())this.scene.remove(m);this.unitMeshes.clear();this.selection=null;}
   setExtensions(points:Point[]|null){this.extensions=points;this.updateHover();}
   setAim(id:number|null,facing=0){this.aim=id===null?null:{id,facing};this.controls.touches.ONE=(id===null?THREE.TOUCH.PAN:undefined) as THREE.TOUCH;this.updateHover();}
   setPlacement(point:Point|null,facing=Math.PI/2){this.draft=point;this.draftFacing=facing;this.updateHover();}
@@ -270,9 +276,9 @@ export class World {
     this.rangeDisplay.setTerrain(this.game.tiles);this.updateHover();this.revision=this.game.revision;
   }
   private addInput(){let down:{x:number;y:number;id:number}|null=null,didMove=false;const canvas=this.renderer.domElement;
-    canvas.addEventListener('pointerdown',e=>{if(e.button!==0)return;down={x:e.clientX,y:e.clientY,id:e.pointerId};didMove=false;});
+    canvas.addEventListener('pointerdown',e=>{if(!this.controls.enabled||e.button!==0)return;if(down){didMove=true;return;}down={x:e.clientX,y:e.clientY,id:e.pointerId};didMove=false;});
     canvas.addEventListener('pointermove',e=>{if(down&&Math.hypot(e.clientX-down.x,e.clientY-down.y)>5)didMove=true;this.aimPoint=this.pick(e.clientX,e.clientY,true);this.hover=this.pick(e.clientX,e.clientY);this.onHover(this.hover);this.updateHover();});
-    canvas.addEventListener('pointerup',e=>{const clicked=down?.id===e.pointerId&&!didMove&&e.button===0;down=null;if(!clicked)return;if(this.tool==='inspect'&&!this.aim&&!this.heroCommand){const id=this.pickUnit(e.clientX,e.clientY);if(id!==null){this.onUnitClick(id);return;}}this.onClick(this.pick(e.clientX,e.clientY,!!this.aim));});
+    canvas.addEventListener('pointerup',e=>{const clicked=this.controls.enabled&&down?.id===e.pointerId&&!didMove&&e.button===0&&Math.hypot(e.clientX-down.x,e.clientY-down.y)<=5;down=null;if(!clicked)return;if(this.tool==='inspect'&&!this.aim&&!this.heroCommand){const id=this.pickUnit(e.clientX,e.clientY);if(id!==null){this.onUnitClick(id);return;}}this.onClick(this.pick(e.clientX,e.clientY,!!this.aim));});
     canvas.addEventListener('pointercancel',()=>{down=null;});
     canvas.addEventListener('pointerleave',()=>{this.hover=null;this.onHover(null);this.updateHover();});
     canvas.addEventListener('contextmenu',e=>e.preventDefault());
@@ -298,7 +304,7 @@ export class World {
   project(x:number,z:number,y?:number){const v=new THREE.Vector3(x,y??this.game.ground(x,z)+0.08,z).project(this.camera);return {x:(v.x+1)/2*this.host.clientWidth,y:(1-v.y)/2*this.host.clientHeight};}
   private updateHover(){
     const p=this.extensions?null:this.tool==='inspect'||this.tool==='remove'?this.hover:this.draft;this.cursor.visible=!!p;
-    if(p){this.cursor.position.set(p.x,this.game.ground(p.x,p.z)+0.09,p.z);const valid=!this.game.validate(this.tool,p.x,p.z);(this.cursor.children[0] as THREE.LineSegments<THREE.BufferGeometry,THREE.LineBasicMaterial>).material.color.set(valid?'#fff0bc':'#df8e7b');}
+    if(p){const footprint=buildingFootprint(this.tool);this.cursor.scale.set(footprint,1,footprint);this.cursor.position.set(p.x,this.game.ground(p.x,p.z)+0.09,p.z);const valid=!this.game.validate(this.tool,p.x,p.z);(this.cursor.children[0] as THREE.LineSegments<THREE.BufferGeometry,THREE.LineBasicMaterial>).material.color.set(valid?'#fff0bc':'#df8e7b');}
     const ghostKey=p&&this.tool!=='inspect'&&this.tool!=='remove'?`${this.tool}:${p.x}:${p.z}:${this.draftFacing}:${this.game.revision}:${this.game.resources.gold}:${this.game.validate(this.tool,p.x,p.z)??'valid'}`:'';
     if(ghostKey!==this.lastGhost){if(this.ghost){this.scene.remove(this.ghost);this.ghost.traverse(o=>{if(o instanceof THREE.Mesh)(o.material as THREE.Material).dispose();});this.ghost=null;}if(ghostKey&&p){this.ghost=this.tool==='bridge'?bridgeModel():['dig','raise','lower','road','spikes'].includes(this.tool)?groundWorkModel(this.tool):connectedBuildingModel(this.game,{kind:this.tool as Structure['kind'],level:1,...p});const valid=!this.game.validate(this.tool,p.x,p.z);this.ghost.traverse(o=>{if(o instanceof THREE.Mesh){o.material=(o.material as THREE.Material).clone();const m=o.material as THREE.MeshStandardMaterial;m.transparent=true;m.opacity=0.48;m.color.set(valid?'#c1d9a7':'#d77c69');o.castShadow=false;}});if(isDirectional({kind:this.tool}))this.ghost.rotation.y=this.draftFacing;this.ghost.position.set(p.x,this.game.ground(p.x,p.z)+(this.tool==='bridge'?HEIGHT_UNIT:0),p.z);this.scene.add(this.ghost);}this.lastGhost=ghostKey;this.updatePlacementGrid(p);}
     const extensionKey=JSON.stringify([this.tool,this.extensions,this.game.revision]);
@@ -330,6 +336,8 @@ export class World {
 
   render(time:number){
     if(this.contextLost)return;if(this.revision!==this.game.revision)this.rebuild();this.controls.update();this.rangeDisplay.updateCamera(this.camera);
+    const visualDt=Math.min(.08,Math.max(0,time-this.heroRenderClock));this.heroRenderClock=time;
+    if(this.game.phase==='victory'||this.game.phase==='defeat')this.terminalTime+=visualDt;
     const ids=new Set<number>();for(const unit of [...this.game.enemies,...this.game.soldiers]){
       ids.add(unit.id);
       const home='home' in unit?this.game.structures.find(s=>s.id===unit.home):undefined;
@@ -341,9 +349,17 @@ export class World {
       const bob=Math.sin(this.game.time*10+unit.id)*.025*motion;
       model.position.set(unit.x,unit.y+bob,unit.z);model.rotation.y=unit.facing;
       animateUnit(model,this.game.time,motion,Math.max(0,this.game.time-(unit.attackAt??-100)),unit.state==='casting','boss' in unit&&unit.boss?.center?Math.max(.01,1-(unit.boss.windupUntil-this.game.time)/BOSS_SLAM.windup):0);
+      if('boss' in unit&&unit.boss){model.visible=this.bossPresentationAge===null||this.bossPresentationAge>=0;animateBoss(model,unit as Enemy,this.bossPresentationAge===null?this.game.time:unit.boss.spawnedAt+this.bossPresentationAge,Math.max(18,this.camera.top/this.camera.zoom*1.8));}
+    }
+    for(const death of this.game.bossDefeats){
+      const unit=death.enemy,age=this.game.time-death.time+this.terminalTime;if(age>12)continue;
+      ids.add(unit.id);let model=this.unitMeshes.get(unit.id);
+      if(!model){model=detailedUnitModel(unit.kind);this.unitMeshes.set(unit.id,model);this.scene.add(model);}
+      model.position.set(unit.x,unit.y,unit.z);model.rotation.y=unit.facing;animateBossDeath(model,age);
+      if(age>=1.5&&!this.fallenImpacts.has(unit.id)){this.fallenImpacts.add(unit.id);this.onBossDeathImpact?.();}
     }
     const hero=this.game.hero;
-    const visualDt=Math.min(.05,Math.max(0,time-this.heroRenderClock));this.heroRenderClock=time;
+
     if(this.game.phase==='defeat')this.heroDefeatTime+=visualDt;
     const fallenTime=hero?this.game.phase==='defeat'?this.heroDefeatTime:this.game.time-hero.fallenAt:0;
     if(hero&&(hero.hp>0||fallenTime<2)){
@@ -375,6 +391,7 @@ export class World {
       if((e.shredUntil??0)>this.game.time)box(this.fx,e.x,e.y+.86,e.z,.3,.05,.08,'#eab173');
     }
     this.bossWarning.update(this.game);
+    this.bossPresence.update(this.game,this.bossPresentationAge);
     this.renderer.render(this.scene,this.camera);
   }
   healthBars() {

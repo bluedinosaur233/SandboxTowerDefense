@@ -1,0 +1,398 @@
+{
+  "version": 1,
+  "bundles": [
+    {
+      "url": "/audio/stream/ui-dfe4fec39066.bin",
+      "bytes": 71928,
+      "entries": [
+        {
+          "file": "click.ogg",
+          "offset": 0,
+          "length": 4957
+        },
+        {
+          "file": "bell.ogg",
+          "offset": 4957,
+          "length": 13231
+        },
+        {
+          "file": "bell-2.ogg",
+          "offset": 18188,
+          "length": 15323
+        },
+        {
+          "file": "notification.wav",
+          "offset": 33511,
+          "length": 3192
+        },
+        {
+          "file": "latch.ogg",
+          "offset": 36703,
+          "length": 3477
+        },
+        {
+          "file": "coins.ogg",
+          "offset": 40180,
+          "length": 8599
+        },
+        {
+          "file": "chop.ogg",
+          "offset": 48779,
+          "length": 3338
+        },
+        {
+          "file": "wood-medium.ogg",
+          "offset": 52117,
+          "length": 3869
+        },
+        {
+          "file": "mining.ogg",
+          "offset": 55986,
+          "length": 8189
+        },
+        {
+          "file": "mining-2.ogg",
+          "offset": 64175,
+          "length": 7753
+        }
+      ]
+    },
+    {
+      "url": "/audio/stream/combat-33fb5d702945.bin",
+      "bytes": 93797,
+      "entries": [
+        {
+          "file": "cannon-fire.ogg",
+          "offset": 0,
+          "length": 30123
+        },
+        {
+          "file": "shell-impact.wav",
+          "offset": 30123,
+          "length": 8630
+        },
+        {
+          "file": "ice-wind.wav",
+          "offset": 38753,
+          "length": 8293
+        },
+        {
+          "file": "electric-cast.wav",
+          "offset": 47046,
+          "length": 6726
+        },
+        {
+          "file": "swing-1.wav",
+          "offset": 53772,
+          "length": 2895
+        },
+        {
+          "file": "swing-2.wav",
+          "offset": 56667,
+          "length": 2812
+        },
+        {
+          "file": "energy-impact.wav",
+          "offset": 59479,
+          "length": 5632
+        },
+        {
+          "file": "ice-crack.wav",
+          "offset": 65111,
+          "length": 7968
+        },
+        {
+          "file": "electric-crack.wav",
+          "offset": 73079,
+          "length": 4627
+        },
+        {
+          "file": "energy-cast.wav",
+          "offset": 77706,
+          "length": 6203
+        },
+        {
+          "file": "sword.wav",
+          "offset": 83909,
+          "length": 5025
+        },
+        {
+          "file": "soft-hit.ogg",
+          "offset": 88934,
+          "length": 2650
+        },
+        {
+          "file": "light-hit.ogg",
+          "offset": 91584,
+          "length": 2213
+        }
+      ]
+    },
+    {
+      "url": "/audio/stream/extra-c9bc9cfb06e7.bin",
+      "bytes": 437095,
+      "entries": [
+        {
+          "file": "siege-impact.wav",
+          "offset": 0,
+          "length": 14169
+        },
+        {
+          "file": "mortar-impact.wav",
+          "offset": 14169,
+          "length": 10675
+        },
+        {
+          "file": "giant-1.wav",
+          "offset": 24844,
+          "length": 6802
+        },
+        {
+          "file": "charge.wav",
+          "offset": 31646,
+          "length": 44786
+        },
+        {
+          "file": "giant-2.wav",
+          "offset": 76432,
+          "length": 7298
+        },
+        {
+          "file": "giant-5.wav",
+          "offset": 83730,
+          "length": 6758
+        },
+        {
+          "file": "bow-heavy.wav",
+          "offset": 90488,
+          "length": 3693
+        },
+        {
+          "file": "flame-cast.wav",
+          "offset": 94181,
+          "length": 9439
+        },
+        {
+          "file": "flame-impact.wav",
+          "offset": 103620,
+          "length": 10377
+        },
+        {
+          "file": "energy-surge.wav",
+          "offset": 113997,
+          "length": 4358
+        },
+        {
+          "file": "ice-crush.wav",
+          "offset": 118355,
+          "length": 4764
+        },
+        {
+          "file": "thunder-burst.wav",
+          "offset": 123119,
+          "length": 23190
+        },
+        {
+          "file": "metal-light.ogg",
+          "offset": 146309,
+          "length": 3028
+        },
+        {
+          "file": "rapier-1.wav",
+          "offset": 149337,
+          "length": 5706
+        },
+        {
+          "file": "rapier-2.wav",
+          "offset": 155043,
+          "length": 5226
+        },
+        {
+          "file": "wing-wind.wav",
+          "offset": 160269,
+          "length": 13435
+        },
+        {
+          "file": "magic-death.wav",
+          "offset": 173704,
+          "length": 43722
+        },
+        {
+          "file": "holy-breath.wav",
+          "offset": 217426,
+          "length": 12008
+        },
+        {
+          "file": "armor-fall.wav",
+          "offset": 229434,
+          "length": 6359
+        },
+        {
+          "file": "blade-cut.wav",
+          "offset": 235793,
+          "length": 3286
+        },
+        {
+          "file": "blade-enchanted.wav",
+          "offset": 239079,
+          "length": 3768
+        },
+        {
+          "file": "metal-heavy.ogg",
+          "offset": 242847,
+          "length": 4143
+        },
+        {
+          "file": "shield-block.wav",
+          "offset": 246990,
+          "length": 5665
+        },
+        {
+          "file": "mnstr-1.wav",
+          "offset": 252655,
+          "length": 5067
+        },
+        {
+          "file": "mnstr-2.wav",
+          "offset": 257722,
+          "length": 5935
+        },
+        {
+          "file": "mnstr-3.wav",
+          "offset": 263657,
+          "length": 5975
+        },
+        {
+          "file": "mnstr-4.wav",
+          "offset": 269632,
+          "length": 7475
+        },
+        {
+          "file": "ogre-1.wav",
+          "offset": 277107,
+          "length": 4948
+        },
+        {
+          "file": "ogre-2.wav",
+          "offset": 282055,
+          "length": 6544
+        },
+        {
+          "file": "ogre-4.wav",
+          "offset": 288599,
+          "length": 6705
+        },
+        {
+          "file": "ogre-5.wav",
+          "offset": 295304,
+          "length": 4330
+        },
+        {
+          "file": "giant-4.wav",
+          "offset": 299634,
+          "length": 5737
+        },
+        {
+          "file": "shade-4.wav",
+          "offset": 305371,
+          "length": 6927
+        },
+        {
+          "file": "shade-5.wav",
+          "offset": 312298,
+          "length": 6709
+        },
+        {
+          "file": "slime-1.wav",
+          "offset": 319007,
+          "length": 3540
+        },
+        {
+          "file": "slime-2.wav",
+          "offset": 322547,
+          "length": 3843
+        },
+        {
+          "file": "slime-7.wav",
+          "offset": 326390,
+          "length": 4129
+        },
+        {
+          "file": "slime-8.wav",
+          "offset": 330519,
+          "length": 5903
+        },
+        {
+          "file": "water-burst.wav",
+          "offset": 336422,
+          "length": 23063
+        },
+        {
+          "file": "shade-10.wav",
+          "offset": 359485,
+          "length": 9586
+        },
+        {
+          "file": "shade-11.wav",
+          "offset": 369071,
+          "length": 10749
+        },
+        {
+          "file": "mnstr-6.wav",
+          "offset": 379820,
+          "length": 7249
+        },
+        {
+          "file": "mnstr-8.wav",
+          "offset": 387069,
+          "length": 6223
+        },
+        {
+          "file": "mnstr-10.wav",
+          "offset": 393292,
+          "length": 5860
+        },
+        {
+          "file": "mnstr-11.wav",
+          "offset": 399152,
+          "length": 7491
+        },
+        {
+          "file": "monster.wav",
+          "offset": 406643,
+          "length": 4712
+        },
+        {
+          "file": "metal-hit.ogg",
+          "offset": 411355,
+          "length": 2299
+        },
+        {
+          "file": "punch-heavy.ogg",
+          "offset": 413654,
+          "length": 5657
+        },
+        {
+          "file": "wood-heavy.ogg",
+          "offset": 419311,
+          "length": 3747
+        },
+        {
+          "file": "wood-heavy-2.ogg",
+          "offset": 423058,
+          "length": 3789
+        },
+        {
+          "file": "water.wav",
+          "offset": 426847,
+          "length": 5560
+        },
+        {
+          "file": "armor.ogg",
+          "offset": 432407,
+          "length": 4688
+        }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 /* A living atlas: brass, red campaign banners and a small parchment briefing. */
-body.campaign-active #app> :not(#world):not(#campaign):not(#campaign-travel):not(.bestiary):not(#audio-panel){display:none!important}
+body.campaign-active #app> :not(#world):not(#campaign):not(#campaign-travel):not(.bestiary):not(#audio-panel):not(.audio-loading){display:none!important}
 #campaign[hidden]{display:none}
 #campaign{position:fixed;inset:0;pointer-events:none;color:#f4e3b9;font-family:'Avenir Next','PingFang SC',sans-serif;overflow:hidden}
 #campaign button{pointer-events:auto}
@@ -105,3 +105,9 @@ body.travel-active #app>:not(#world):not(#campaign):not(#campaign-travel){visibi
 
 body.campaign-active #audio-panel{z-index:90;top:190px;max-height:calc(100dvh - 205px);overflow:auto}
 @media(max-width:580px){body.campaign-active #audio-panel{top:170px;max-height:calc(100dvh - 185px)}}
+.atlas-pin small{color:#f7c654}.atlas-pin .plated-star{background:linear-gradient(145deg,#4fb9ff 20%,#7bdcfa 48%,#f5a0d1 90%);background-clip:text;-webkit-background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 0 2px #73bff7)}
+
+.atlas-score-guide{display:block;text-align:left;margin:10px 0 0;padding:9px 10px;border:1px solid #aa884846;background:#e6d9b34a;color:#654c2f;font-size:10px}.atlas-score-guide>b{font-size:10px;letter-spacing:.12em}.atlas-score-guide>div{display:flex;justify-content:space-between;gap:6px;margin-top:5px}.atlas-score-guide>div>span{color:#9c650e;font-size:12px;white-space:nowrap}.atlas-score-guide em{display:block;font:9px/1.7 system-ui;color:#6c5638}.atlas-score-guide p{display:flex;align-items:center;gap:5px;font-size:10px;margin:8px 0 0;line-height:1.4;color:#305f80}.atlas-score-guide img{width:23px;height:24px;object-fit:contain}
+#atlas-hero.hero-missing{border:2px solid #b16e2c;background:linear-gradient(110deg,#fff0c9,#edc588);padding:8px;box-shadow:0 0 0 3px #b8833020;margin-top:8px}#atlas-hero.hero-missing img{filter:grayscale(1);opacity:.62}#atlas-hero.hero-missing span{color:#663d17;font-size:12px;font-weight:800}#atlas-hero.hero-missing small{font-size:9px;color:#83431c;font-weight:500;line-height:1.5}#atlas-hero.hero-missing b{white-space:nowrap;font-size:11px;font-weight:800;color:#743e15}
+@media(max-height:720px){.atlas-score-guide{padding:5px 8px;margin-top:6px}.atlas-score-guide>div{margin-top:2px}.atlas-score-guide p{margin-top:4px}.atlas-score-guide>b{display:none}}
+.atlas-pin img.plated-star{display:inline-block;vertical-align:-2px;width:14px;height:15px;object-fit:contain;background:none;filter:drop-shadow(0 0 2px #69caff77)}

@@ -1,11 +1,36 @@
-.boss-hud{position:absolute;z-index:17;top:20px;left:50%;transform:translateX(-50%);width:min(430px,38vw);padding:10px 18px 12px;color:#f7e3bc;background:linear-gradient(120deg,#2f2020ef,#491f1de8,#272222ef);border:1px solid #b38a52;border-radius:5px;box-shadow:0 5px 26px #170a0988;pointer-events:none;animation:boss-banner-enter .65s ease-out}
-.boss-hud[hidden]{display:none}.boss-heading{display:flex;align-items:center;gap:10px}.boss-sigil{font-size:30px;color:#e1ad66}.boss-heading small{font-size:10px;letter-spacing:2px;color:#d3b893}.boss-heading h2{margin:1px 0 6px;font:600 23px 'Songti SC',serif;letter-spacing:4px}.boss-status{margin-left:auto;max-width:130px;text-align:right;font-size:10px;color:#d8b092;line-height:1.6}.boss-health{height:9px;border:1px solid #a7804c;background:#160f13;border-radius:2px;overflow:hidden}.boss-health i{display:block;width:100%;height:100%;background:linear-gradient(90deg,#8f302c,#d76644,#ffc077);transition:width .18s linear}.boss-hud.enraged{border-color:#e3754d}.boss-hud.charging .boss-status{color:#ffca71}.boss-hud.charging .boss-health{box-shadow:0 0 10px #e95f3766}
+/* The artwork is 1200 x 282. All slots share its coordinate system. */
+.boss-hud{position:absolute;z-index:17;top:16px;left:50%;transform:translateX(-50%);width:min(620px,52vw);aspect-ratio:1200/282;padding:0;border:0;color:#fff1cb;pointer-events:none;overflow:hidden;filter:drop-shadow(0 5px 5px #100905bb);animation:boss-banner-enter .8s cubic-bezier(.16,1,.3,1) both}
+.boss-hud.grom-hud{background:url('/art/ui/boss/grom-frame.webp') center/100% 100% no-repeat}
+.boss-hud[hidden],.boss-hud [hidden]{display:none}
+.boss-name{position:absolute;left:26%;top:28.7%;width:48%;height:20%;display:flex;align-items:center;justify-content:center;animation:boss-name-enter .5s .15s both}
+.boss-title-art{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 1px 1px #000)}
+.boss-name h2{margin:0;color:#fff1cb;font:700 clamp(14px,2vw,26px) 'Songti SC',serif;white-space:nowrap;text-shadow:0 2px 2px #000}
+.boss-name h2.art-loaded{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.boss-health{position:absolute;left:20.75%;top:64.2%;width:58%;height:11.35%;background:#1c080b;box-shadow:inset 0 1px 3px #000;border-radius:2px;overflow:hidden}
+.boss-health i{display:block;height:100%;background:linear-gradient(0deg,#b32621,#ee5841 60%,#ffad72);box-shadow:inset 0 1px 0 #ffd294;transition:width .18s linear;transform-origin:left;animation:boss-health-fill .9s .3s both}
+.boss-status{position:absolute;left:20.75%;top:64.2%;width:58%;height:11.35%;display:flex;align-items:center;justify-content:center;color:#fff7df;font-size:clamp(9px,1.1vw,12px);line-height:1;letter-spacing:2px;text-shadow:0 1px 2px #000,1px 0 2px #000,-1px 0 2px #000;font-weight:800}
+.boss-hud.charging .boss-health{box-shadow:0 0 10px #ffb04d}
+.boss-hud.enraged .boss-health{animation:boss-rage-pulse 1.5s ease-in-out infinite}
+.boss-hud.enraged .boss-health i{background:linear-gradient(0deg,#b53614,#f47936 65%,#ffd48c)}
+.boss-reveal-glint{position:absolute;inset:20% auto 20% 0;width:35%;background:linear-gradient(90deg,transparent,#ffe3a935,transparent);transform:skewX(-25deg);animation:boss-glint 1.2s .25s both}
+@keyframes boss-banner-enter{0%{opacity:0;translate:0 -70px;scale:.88}65%{opacity:1;translate:0 5px;scale:1.025}100%{opacity:1;translate:0 0;scale:1}}
+@keyframes boss-name-enter{from{opacity:0;translate:0 6px}to{opacity:1;translate:0 0}}
+@keyframes boss-health-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes boss-glint{from{left:-55%;opacity:0}25%{opacity:1}to{left:135%;opacity:0}}
+@keyframes boss-rage-pulse{0%,100%{box-shadow:0 0 4px #e95f3744}50%{box-shadow:0 0 12px #ff704baa}}
+@media(max-width:1000px){.boss-hud{top:104px;width:min(560px,76vw)}}
+@media(max-width:540px){.boss-hud{top:100px;width:calc(100vw - 16px)}}
+@media(prefers-reduced-motion:reduce){.boss-hud,.boss-hud *{animation:none!important}.boss-health i{transition:none}.boss-reveal-glint{display:none}}
+/* Keep the first-encounter card below the whole frame. */
+@media(max-width:1000px){#app:has(.boss-hud:not([hidden])) .enemy-intel{top:244px;left:20px;right:auto;width:230px}}
+@media(max-width:540px){#app:has(.boss-hud:not([hidden])) .enemy-intel{top:calc(108px + (100vw - 16px)*.235);left:auto;right:12px;width:220px}}
 .scout-callout.boss-warning{background:linear-gradient(110deg,#652b27,#3d1b29);border:2px solid #e2ad64;box-shadow:0 0 16px #b7473855}.scout-callout.boss-warning>span{color:#ffe1a4}.scout-modal.boss-warning{border-color:#df9d59;background:linear-gradient(120deg,#382726,#251f27)}.boss-scout-alert{padding:12px 15px;margin:12px 0;border:1px solid #c78450;border-left:4px solid #e6b16e;color:#f5d6a6;background:#783d3033;font-size:12px;line-height:1.7}.front-marker.boss-warning{border:2px solid #e4ae63!important;background:#652923ed!important;box-shadow:0 0 14px #e47d4055}.front-marker.boss-warning small{color:#ffd388!important}
 .bestiary-roster button[data-rank=elite]{border-left:3px solid #9472b3}.bestiary-roster button[data-rank=boss]{border-left:3px solid #d28b4d}.enemy-intel.boss-intel{border-color:#df9860;background:linear-gradient(120deg,#602e28,#302529)}
-@keyframes boss-banner-enter{from{opacity:0;translate:0 -24px}to{opacity:1;translate:0 0}}
-@media(max-width:1000px){.boss-hud{top:112px;width:min(430px,65vw);padding:7px 12px}.boss-heading h2{font-size:19px}.boss-heading small{font-size:9px}.boss-sigil{font-size:24px}}
-@media(max-width:540px){.boss-hud{top:106px;width:calc(100vw - 32px)}.boss-heading h2{font-size:18px;letter-spacing:2px}.boss-status{font-size:9px;max-width:115px}.boss-heading small{font-size:8px;letter-spacing:1px}.boss-health{height:7px}}
-@media(prefers-reduced-motion:reduce){.boss-hud{animation:none}.boss-health i{transition:none}}
-/* Keep the first-encounter card clear of the centered boss header. */
-@media(max-width:1000px){#app:has(.boss-hud:not([hidden])) .enemy-intel{top:206px;left:20px;right:auto;width:230px}}
-@media(max-width:540px){#app:has(.boss-hud:not([hidden])) .enemy-intel{top:194px;left:auto;right:12px;width:220px}}
+
+/* Keep only the rendered battlefield during the boss camera sequence. */
+body.boss-cinematic #app>:not(#world){pointer-events:none!important;animation:boss-ui-leave .3s ease-in forwards!important}
+@keyframes boss-ui-leave{to{opacity:0;visibility:hidden;translate:0 12px}}
+body.boss-cinematic .build-dock{translate:0 0;transition:translate .3s}
+@media(prefers-reduced-motion:reduce){body.boss-cinematic #app>:not(#world){animation:none!important;visibility:hidden!important}}
+.boss-hud.departing{pointer-events:none;animation:boss-banner-exit .7s ease-in forwards!important}
+@keyframes boss-banner-exit{0%{opacity:1;filter:brightness(1)}25%{opacity:1;filter:brightness(1.6)}100%{opacity:0;translate:0 -65px;filter:brightness(.5)}}

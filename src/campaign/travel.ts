@@ -15,7 +15,7 @@ export function travelFrame(seconds:number,reduced=false,readyAt:number|null=red
 export class CampaignTravel {
   active=false;
   private overlay=document.createElement('div');
-  private state:{id:MapId;start:number;reduced:boolean;entered:boolean;readyAt:number|null;from:THREE.Vector3;target:THREE.Vector3;zoom:number;arrivalPosition?:THREE.Vector3;arrivalTarget?:THREE.Vector3}|null=null;
+  private state:{id:MapId;start:number;reduced:boolean;entered:boolean;readyAt:number|null;from:THREE.Vector3;target:THREE.Vector3;zoom:number;arrivalPosition?:THREE.Vector3;arrivalTarget?:THREE.Vector3;arrivalZoom?:number}|null=null;
   constructor(private menu:CampaignMenu,private world:World,private enter:(id:MapId)=>void,private arrived:()=>void){
     this.overlay.id='campaign-travel';this.overlay.hidden=true;this.overlay.setAttribute('role','status');this.overlay.setAttribute('aria-live','polite');
     this.overlay.innerHTML='<div class="travel-clouds"></div><div class="travel-destination"><small>越过山川，奔赴前线</small><b></b></div>';
@@ -39,7 +39,7 @@ export class CampaignTravel {
       this.menu.render(time);return;
     }
     if(!s.entered){
-      s.entered=true;this.enter(s.id);s.arrivalPosition=this.world.camera.position.clone();s.arrivalTarget=this.world.controls.target.clone();this.world.controls.enabled=false;this.world.controls.enableDamping=false;
+      s.entered=true;this.enter(s.id);s.arrivalZoom=this.world.camera.zoom;s.arrivalPosition=this.world.camera.position.clone();s.arrivalTarget=this.world.controls.target.clone();this.world.controls.enabled=false;this.world.controls.enableDamping=false;
       // Warm the first visible camera pose, including its shadows and GPU buffers.
       const start=new THREE.Vector3(this.world.game.goal.x,this.world.game.map.cameraHeight,this.world.game.goal.z);
       this.world.controls.target.copy(start);this.world.camera.position.copy(start).add(new THREE.Vector3(6,115,24));this.world.camera.zoom=.7;this.world.camera.updateProjectionMatrix();
@@ -49,7 +49,7 @@ export class CampaignTravel {
     const target=s.arrivalTarget!,start=new THREE.Vector3(this.world.game.goal.x,this.world.game.map.cameraHeight,this.world.game.goal.z);
     this.world.controls.target.copy(start).lerp(target,f.arrival);
     this.world.camera.position.copy(start).add(new THREE.Vector3(6,115,24)).lerp(s.arrivalPosition!,f.arrival);
-    this.world.camera.zoom=.7+.3*f.arrival;this.world.camera.updateProjectionMatrix();this.world.render(time);
+    this.world.camera.zoom=THREE.MathUtils.lerp(.7,s.arrivalZoom!,f.arrival);this.world.camera.updateProjectionMatrix();this.world.render(time);
     if(f.done){this.world.controls.enableDamping=true;this.world.controls.enabled=true;this.overlay.hidden=true;document.body.classList.remove('travel-active');this.active=false;this.state=null;this.arrived();}
   }
 }

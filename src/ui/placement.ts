@@ -11,7 +11,7 @@ export class BuildPlacement {
   rotate(delta=Math.PI/4){this.facing=(this.facing+delta+Math.PI*2)%(Math.PI*2);}
   cancel(){this.begin('inspect');}
   neighbors(game:Game){return this.anchor?[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dz])=>({x:this.anchor!.x+dx,z:this.anchor!.z+dz})).filter(p=>!game.validate(this.tool,p.x,p.z)):[];}
-  error(game:Game){return this.point?game.validate(this.tool,this.point.x,this.point.z):'移到地图上，点击建造';}
+  error(game:Game){return this.point?game.validate(this.tool,this.point.x,this.point.z):'点击空地建造';}
   click(game:Game,point:Point|null):'built'|'cancelled'|'invalid'{
     if(this.dragging||this.tool==='inspect'||this.tool==='remove')return 'invalid';
     if(this.anchor&&!this.neighbors(game).some(p=>p.x===point?.x&&p.z===point?.z)){this.cancel();return 'cancelled';}

@@ -87,7 +87,7 @@ test('card drag release is free, next click builds once, and only terrain create
 });
 test('extension ghosts revalidate occupation and gold, while invalid first placement stays available',()=>{
  const g=flat(),draft=new BuildPlacement();draft.begin('wall');draft.click(g,{x:10,z:10});
- g.addStructure('archer',11,10);assert.equal(draft.neighbors(g).length,3);const money=g.resources.gold;
+ g.addStructure('wall',11,10);assert.equal(draft.neighbors(g).length,3);const money=g.resources.gold;
  assert.equal(draft.click(g,{x:11,z:10}),'cancelled');assert.equal(g.resources.gold,money);
  draft.begin('wall');assert.equal(draft.click(g,{x:11,z:10}),'invalid');assert.ok(draft.point);
  draft.click(g,{x:15,z:10});g.resources.gold=0;assert.deepEqual(draft.neighbors(g),[]);assert.equal(draft.click(g,{x:16,z:10}),'cancelled');
@@ -103,4 +103,41 @@ test('directional structures accept free angles only in preparation, with correc
  assert.equal(g.orientStructure(c.id,NaN),false);assert.equal(g.orientStructure(a.id,1),false);
  for(const phase of ['battle','victory','defeat'] as const){g.phase=phase;const before=c.facing;assert.equal(g.orientStructure(c.id,1),false);assert.equal(c.facing,before);}
  assert.equal(g.resources.gold,money);g.phase='preparation';g.upgrade(c.id);g.upgrade(c.id,'bombard');assert.equal(isDirectional(c),false);assert.equal(g.orientStructure(c.id,1),false);
+});
+
+
+test('initial tower foundations reserve upgrade space and cannot be overlapped from either side',()=>{
+ const g=flat();assert.ok(g.build('archer',10,10));const tower=g.structureAt(10,10)!,gold=g.resources.gold;
+ for(const [x,z] of [[11,10],[11,11]])for(const kind of ['mage','barracks','wall','palisade','road','dig','raise','lower','spikes'] as const){
+  assert.equal(g.build(kind,x,z),false,kind);assert.equal(g.resources.gold,gold);
+ }
+ assert.ok(g.build('mage',12,10));assert.ok(g.upgrade(tower.id));assert.ok(g.upgrade(tower.id,'ranger'));
+ assert.ok(g.build('wall',10,12));assert.ok(g.build('wall',11,12),'walls still join without gaps');
+ const reverse=flat();assert.ok(reverse.build('wall',10,10));assert.equal(reverse.build('mage',11,10),false);
+ const cannon=flat();assert.ok(cannon.build('cannon',10,10));assert.equal(cannon.build('archer',12,10),false);assert.ok(cannon.build('archer',13,10));
+});
+test('expanded foundations reject unsupported ground and earthworks without spending gold',()=>{
+ for(const patch of [{water:true},{chasm:true},{h:4},{active:false},{spikes:true},{paved:true}]){
+  const g=flat();Object.assign(g.tile(11,11)!,patch);const gold=g.resources.gold;
+  assert.equal(g.build('mage',10,10),false);assert.equal(g.resources.gold,gold);assert.equal(g.structures.length,0);
+ }
+});
+test('terrain fortifications cannot be upgraded but retain repair and removal',()=>{
+ const g=flat();for(const kind of ['wall','palisade'] as const){
+  const s=g.addStructure(kind,10,10),gold=g.resources.gold;assert.equal(g.upgrade(s.id),false);assert.equal(s.level,1);assert.equal(g.resources.gold,gold);
+  s.hp-=20;assert.ok(g.repairStructure(s.id));assert.equal(s.hp,s.maxHp);assert.ok(g.build('remove',10,10));
+ }
+});
+test('all tower tiers and branches fit inside their reserved footprint, including cannon rotation',async()=>{
+ const {towerModel}=await import('../src/render/tower-models');const {Box3}=await import('three');
+ const {TOWER_KINDS,BRANCHES}=await import('../src/simulation/towers');const {buildingFootprint}=await import('../src/simulation/footprint');
+ for(const kind of [...TOWER_KINDS,'barracks'] as const)for(const level of [1,2,3]){
+  const branches=level<3?[undefined]:kind==='barracks'?['spellblade','paladin'] as const:Object.values(BRANCHES).filter(b=>b.kind===kind).map(b=>b.id);
+  for(const branch of branches){const model=towerModel(kind,level,kind==='barracks'?undefined:branch as any,kind==='barracks'?branch as any:undefined);
+   for(const angle of kind==='cannon'?[0,Math.PI/8,Math.PI/4]:[0]){model.rotation.y=angle;const bounds=new Box3().setFromObject(model),half=buildingFootprint(kind)/2;
+    assert.ok(Math.max(Math.abs(bounds.min.x),Math.abs(bounds.max.x),Math.abs(bounds.min.z),Math.abs(bounds.max.z))<=half+.001,`${kind} ${level} ${branch}`);
+   }
+   model.traverse(o=>{if('geometry' in o)(o.geometry as any).dispose();});
+  }
+ }
 });

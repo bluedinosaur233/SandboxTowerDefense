@@ -1,3 +1,5 @@
+import bundledAudio from './audio-bundles.json';
+import { licensedBundle, type AudioBundle } from './audio-bundle';
 import { sampleLevel } from './sample-level';
 import { CombatVoices } from './combat-voices';
 import { LICENSED_SOUNDS, licensedFiles } from './licensed-sounds';
@@ -5,12 +7,12 @@ import { sampleOnset } from './sample-onset';
 import type { SoundEvent } from '../simulation/game';
 import { SOUND_FILES, SOUND_LIBRARY, UI_CUES, type AudioCue } from './sound-library';
 export const TRACKS = [
-  { title:'Skye Cuillin', subtitle:'凯尔特原野 · 竖琴与哨笛', file:'skye-cuillin.mp3', isrc:'USUAN1100346' },
-  { title:'Ascending the Vale', subtitle:'风与牧歌 · 山谷的黎明', file:'ascending-the-vale.mp3', isrc:'USUAN1600064' },
-  { title:'Celtic Impulse', subtitle:'凯尔特行旅 · 扬琴与锡哨', file:'celtic-impulse.mp3', isrc:'USUAN1100297' },
-  { title:'Lord of the Land', subtitle:'边境行军 · 鲁特琴与长笛', file:'lord-of-the-land.mp3', isrc:'USUAN1400022' },
-  { title:'Folk Round', subtitle:'营地夜曲 · 民谣轮唱', file:'folk-round.mp3', isrc:'USUAN1100357' },
-  { title:'The Pyre', subtitle:'山隘守望 · 曼陀林与弦乐', file:'the-pyre.mp3', isrc:'USUAN1100846' },
+  { title:'Skye Cuillin', subtitle:'凯尔特原野 · 竖琴与哨笛', file:'skye-cuillin.m4a', isrc:'USUAN1100346' },
+  { title:'Ascending the Vale', subtitle:'风与牧歌 · 山谷的黎明', file:'ascending-the-vale.m4a', isrc:'USUAN1600064' },
+  { title:'Celtic Impulse', subtitle:'凯尔特行旅 · 扬琴与锡哨', file:'celtic-impulse.m4a', isrc:'USUAN1100297' },
+  { title:'Lord of the Land', subtitle:'边境行军 · 鲁特琴与长笛', file:'lord-of-the-land.m4a', isrc:'USUAN1400022' },
+  { title:'Folk Round', subtitle:'营地夜曲 · 民谣轮唱', file:'folk-round.m4a', isrc:'USUAN1100357' },
+  { title:'The Pyre', subtitle:'山隘守望 · 曼陀林与弦乐', file:'the-pyre.m4a', isrc:'USUAN1100846' },
 ];
 export type MusicScene='campaign'|'battle';
 export const MUSIC_PLAYLISTS:Record<MusicScene,readonly number[]>={campaign:[0,1,4,2],battle:[3,2,5,0,1]};
@@ -33,13 +35,19 @@ export class Audio {
   private lastLoad=-Infinity;
   private packChecked=false;
   private packFiles:string[]=[];
+  private packBundle:AudioBundle|null=null;
+  private packedDownloads=new Map<string,Promise<ArrayBuffer>>();
   private ready=false;
   private last=new Map<AudioCue,number>();
-  private active=new Map<AudioBufferSourceNode,{kind:AudioCue;gain:GainNode;pan:StereoPannerNode}>();
+  private active=new Map<AudioBufferSourceNode,{kind:AudioCue;gain:GainNode;pan:StereoPannerNode;presentation:boolean}>();
   private suspended=false;
   private scene:MusicScene='battle';
   private fade=1;
   private sceneTracks:Partial<Record<MusicScene,number>>={};
+  private resumePending=false;
+  private musicRequest=0;
+  private musicPending=false;
+  private musicFailed=false;
   private get musicAllowed(){return this.scene==='campaign'||!this.suspended;}
   update(dt:number){this.fade=Math.min(1,this.fade+Math.max(0,dt)/1.2);this.music.volume=this.musicVolume*this.fade;}
 
@@ -49,10 +57,13 @@ export class Audio {
       this.enabled=saved.enabled??true; this.musicEnabled=saved.musicEnabled??true;
       this.musicVolume=saved.musicVolume??.32; this.sfxVolume=saved.sfxVolume??.65; this.track=Number.isInteger(saved.track)&&saved.track>=0&&saved.track<TRACKS.length?saved.track:0;
     } catch {}
-    this.music.preload='none';this.music.loop=false;this.music.src='/audio/music/'+TRACKS[this.track].file;this.music.volume=this.musicVolume;
+    this.music.preload=this.musicEnabled?'auto':'none';this.music.loop=false;this.music.src='/audio/music/'+TRACKS[this.track].file;this.music.volume=this.musicVolume;
+    void this.downloadBundle(bundledAudio.bundles[0]).catch(()=>{});
     this.music.addEventListener('ended',()=>this.nextTrack());
-    this.music.addEventListener('playing',()=>this.musicStatus='正在演奏');
-    this.music.addEventListener('error',()=>this.musicStatus='音乐加载失败 · 可切换曲目重试');
+    this.music.addEventListener('playing',()=>{this.musicFailed=false;this.musicStatus='正在演奏';});
+    this.music.addEventListener('waiting',()=>this.musicStatus='音乐缓冲中…');
+    this.music.addEventListener('canplay',()=>{if(this.music.paused&&!this.unlocked)this.musicStatus='音乐已缓冲 · 点击页面启奏';});
+    this.music.addEventListener('error',()=>{this.musicFailed=true;this.musicStatus='音乐加载失败 · 可切换曲目重试';});
   }
   private save(){
     try{localStorage.setItem('riverwatch-audio-v2',JSON.stringify({enabled:this.enabled,musicEnabled:this.musicEnabled,musicVolume:this.musicVolume,sfxVolume:this.sfxVolume,track:this.track}));}catch{}
@@ -63,19 +74,51 @@ export class Audio {
       this.compressor.threshold.value=-16;this.compressor.ratio.value=4;this.compressor.attack.value=.005;this.compressor.release.value=.12;
       this.master.connect(this.compressor).connect(this.context.destination);this.master.gain.value=this.enabled?this.sfxVolume:0;
     }
-    void this.context.resume().catch(()=>{});this.unlocked=true;
-    void this.preloadSamples();
+    if(this.context.state!=='running'&&!this.resumePending){
+      this.resumePending=true;
+      void this.context.resume().then(()=>{
+        if(this.context?.state!=='running')this.sampleStatus='浏览器暂停了声音 · 请点击页面重试';
+        else if(this.ready)this.sampleStatus=this.packFiles.some(file=>this.buffers.has(file))?'Pixabay / Mixkit 音效已就绪':'本地采样音效已就绪';
+      }).catch(()=>{this.sampleStatus='浏览器未允许播放声音 · 请点击页面重试';})
+        .finally(()=>{this.resumePending=false;});
+    }
+    this.unlocked=true;
     if(this.musicEnabled&&this.music.paused&&this.musicAllowed)this.playMusic();
+    void this.preloadSamples();
   }
   private async discoverPack(){
     if(this.packChecked)return;
     const abort=new AbortController(),timeout=setTimeout(()=>abort.abort(),4000);
     try{
       const response=await fetch('/audio/licensed/pack.json',{signal:abort.signal});
-      if(response.ok)this.packFiles=licensedFiles(await response.json());
+      if(response.ok){const pack=await response.json();this.packFiles=licensedFiles(pack);this.packBundle=licensedBundle(pack.streamBundle,this.packFiles);}
       this.packChecked=true;
     }catch{/* Offline/source-only installs keep the bundled sounds; retry on the next unlock. */}
     finally{clearTimeout(timeout);}
+  }
+  private downloadBundle(bundle:AudioBundle){
+    const existing=this.packedDownloads.get(bundle.url);if(existing)return existing;
+    const abort=new AbortController(),timeout=setTimeout(()=>abort.abort(),20000);
+    const pending=fetch(bundle.url,{signal:abort.signal,cache:'force-cache'}).then(async response=>{
+      if(!response.ok)throw new Error('Audio bundle HTTP '+response.status);
+      const bytes=await response.arrayBuffer();
+      if(bytes.byteLength!==bundle.bytes)throw new Error('Incomplete audio bundle');
+      return bytes;
+    }).catch(error=>{this.packedDownloads.delete(bundle.url);throw error;}).finally(()=>clearTimeout(timeout));
+    this.packedDownloads.set(bundle.url,pending);return pending;
+  }
+  private async loadBundle(bundle:AudioBundle){
+    if(bundle.entries.every(e=>this.buffers.has(e.file)))return;
+    try{
+      const bytes=await this.downloadBundle(bundle);
+      for(const entry of bundle.entries){
+        if(this.buffers.has(entry.file))continue;
+        try{const buffer=await this.context!.decodeAudioData(bytes.slice(entry.offset,entry.offset+entry.length));
+          this.offsets.set(entry.file,sampleOnset(buffer));this.buffers.set(entry.file,buffer);this.failures.delete(entry.file);
+        }catch{/* The original individual recording is the codec/network fallback. */}
+      }
+      this.packedDownloads.delete(bundle.url);
+    }catch{/* A partial or missing bundle never blocks original-file recovery. */}
   }
   async preloadSamples():Promise<void>{
     if(!this.context||this.ready)return;
@@ -85,7 +128,7 @@ export class Audio {
     const uiFiles=new Set([...UI_CUES].flatMap(cue=>SOUND_LIBRARY[cue].files));
     const load=async(files:string[])=>{
       const pending=files.filter(file=>!this.buffers.has(file)).sort((a,b)=>Number(uiFiles.has(b))-Number(uiFiles.has(a)));
-      await Promise.all(Array.from({length:Math.min(6,pending.length)},async()=>{
+      await Promise.all(Array.from({length:Math.min(2,pending.length)},async()=>{
         while(pending.length){const file=pending.shift()!;
           const abort=new AbortController(),timeout=setTimeout(()=>abort.abort(),15000);
           try{
@@ -98,15 +141,54 @@ export class Audio {
         }
       }));
     };
-    // UI and bundled fallback load immediately, even if the optional pack is unavailable.
-    this.loading=Promise.all([load(SOUND_FILES),this.discoverPack().then(()=>load(this.packFiles))]).then(()=>{
+    // A few small transport requests replace a hundred WAV transfers. Decode each
+    // independent clip so onset alignment and per-cue volume remain unchanged.
+    const pack=this.discoverPack();
+    this.loading=(async()=>{
+      await this.loadBundle(bundledAudio.bundles[0]);await load([...uiFiles]);
+      await Promise.all([
+        (async()=>{await this.loadBundle(bundledAudio.bundles[1]);await this.loadBundle(bundledAudio.bundles[2]);await load(SOUND_FILES);})(),
+        pack.then(async()=>{if(this.packBundle)await this.loadBundle(this.packBundle);await load(this.packFiles);}),
+      ]);
+    })().then(()=>{
       this.ready=this.packChecked&&this.failures.size===0;
       const hasPack=this.packFiles.some(file=>this.buffers.has(file));
-      this.sampleStatus=this.failures.size?'部分音效加载失败 · 已使用可用采样，点击音效开关重试':hasPack?'Pixabay / Mixkit 音效已就绪':'本地采样音效已就绪';
+      this.sampleStatus=this.context?.state!=='running'?'浏览器暂停了声音 · 请点击页面重试':this.failures.size?(this.buffers.size?'部分音效加载失败 · 已使用可用采样，点击页面重试':'音效未加载成功 · 请检查网络后点击页面重试'):hasPack?'Pixabay / Mixkit 音效已就绪':'本地采样音效已就绪';
     }).finally(()=>{this.loading=null;});
     return this.loading;
   }
-  private playMusic(){this.musicStatus='乐师调弦中…';void this.music.play().catch(()=>this.musicStatus='点击音乐开关以启奏');}
+  private playMusic(){
+    if(this.musicPending)return;
+    const request=++this.musicRequest;this.musicPending=true;this.musicFailed=false;
+    this.musicStatus='音乐缓冲中…';
+    void this.music.play().catch((error:unknown)=>{
+      if(request!==this.musicRequest)return;
+      const name=error instanceof Error?error.name:'';
+      if(name==='AbortError')return;
+      this.musicFailed=true;
+      this.musicStatus=name==='NotAllowedError'?'浏览器未允许播放音乐 · 请点击页面重试':'音乐加载失败 · 请检查网络或切换曲目';
+    }).finally(()=>{if(request===this.musicRequest)this.musicPending=false;});
+  }
+  loadingNotice(){
+    const samplesLoaded=this.buffers.size,samplesTotal=SOUND_FILES.length+this.packFiles.length;
+    const musicLoading=this.musicEnabled&&this.musicAllowed&&this.music.readyState<3;
+    const musicBlocked=this.musicEnabled&&this.musicAllowed&&this.musicFailed;
+    const samplesLoading=this.enabled&&this.unlocked&&(!this.ready||this.context?.state!=='running');
+    const needsGesture=!this.unlocked&&(this.enabled||(this.musicEnabled&&this.musicAllowed));
+    const failed=musicBlocked||(this.enabled&&this.failures.size>0);
+    return {visible:musicLoading||musicBlocked||samplesLoading||needsGesture,
+      samplesReady:!this.enabled||(this.ready&&this.context?.state==='running'),needsGesture,
+      failed,
+      title:failed?'声音加载遇到问题':needsGesture&&!musicLoading?'点击启用游戏声音':'声音资源加载中',
+      music:this.musicEnabled?(this.musicFailed?this.musicStatus:this.music.readyState<3?'音乐：正在缓冲…':this.unlocked?'音乐：已缓冲':'音乐：已缓冲，点击页面播放'):'音乐：已关闭',
+      samples:this.enabled?(this.unlocked?`音效：${samplesLoaded} / ${samplesTotal}${this.context?.state!=='running'?' · 点击恢复声音':''}`:'音效：点击页面后加载'):'音效：已关闭',
+      progress:samplesTotal?samplesLoaded/samplesTotal:0};
+  }
+  /** Retry blocked playback and failed downloads on a fresh browser gesture. */
+  retryFromGesture(){
+    if(!this.unlocked||this.context?.state!=='running'||!this.ready||
+      (this.musicEnabled&&this.musicAllowed&&this.music.paused))this.unlock();
+  }
   toggle(){
     this.enabled=!this.enabled;this.unlock();
     if(this.master)this.master.gain.value=this.enabled?this.sfxVolume:0;
@@ -124,8 +206,10 @@ export class Audio {
   }
   selectTrack(index:number){
     if(!Number.isInteger(index)||index<0||index>=TRACKS.length)return;
-    this.track=index;this.sceneTracks[this.scene]=index;
-    this.music.src='/audio/music/'+TRACKS[this.track].file;this.music.load();this.fade=0;this.music.volume=0;
+    this.sceneTracks[this.scene]=index;
+    if(this.track===index)return;
+    this.track=index;this.musicRequest++;this.musicPending=false;this.musicFailed=false;
+    this.music.preload=this.musicEnabled?'auto':'none';this.music.src='/audio/music/'+TRACKS[this.track].file;this.music.load();this.fade=0;this.music.volume=0;
     if(this.unlocked&&this.musicEnabled&&this.musicAllowed)this.playMusic();
     else if(!this.musicAllowed){this.music.pause();this.musicStatus='游戏暂停中';}
     this.save();
@@ -137,7 +221,7 @@ export class Audio {
     this.selectTrack(this.sceneTracks[scene]??MUSIC_PLAYLISTS[scene][0]);
   }
   private stopEffects(combatOnly=false){
-    for(const [source,voice] of this.active)if(!combatOnly||!UI_CUES.has(voice.kind))source.stop();
+    for(const [source,voice] of this.active)if(!combatOnly||(!UI_CUES.has(voice.kind)&&!voice.presentation))source.stop();
   }
   setSuspended(value:boolean){
     if(this.suspended===value)return;this.suspended=value;
@@ -148,9 +232,9 @@ export class Audio {
   click(){this.effect('click');}
   build(){this.effect('build');}
   wave(){this.effect('wave');}
-  effect(kind:AudioCue,pan=0,gain=1){
+  effect(kind:AudioCue,pan=0,gain=1,presentation=false){
     const ctx=this.context;
-    if(!this.enabled||this.sfxVolume===0||!ctx||!this.master||(this.suspended&&!UI_CUES.has(kind)))return;
+    if(!this.enabled||this.sfxVolume===0||!ctx||!this.master||(this.suspended&&!presentation&&!UI_CUES.has(kind)))return;
     const preferred=LICENSED_SOUNDS[kind];
     const definition=preferred?.files.some(file=>this.buffers.has(file))?preferred:SOUND_LIBRARY[kind],now=ctx.currentTime;
     if(now-(this.last.get(kind)??-100)<definition.interval)return;
@@ -175,7 +259,7 @@ export class Audio {
     volume.gain.setValueAtTime(0,now);volume.gain.linearRampToValueAtTime(level,now+Math.min(.005,duration/4));
     volume.gain.setValueAtTime(level,Math.max(now+.005,end-.025));volume.gain.linearRampToValueAtTime(0,end);
     panner.pan.value=Math.max(-.8,Math.min(.8,pan));source.connect(volume).connect(panner).connect(this.master);
-    this.active.set(source,{kind,gain:volume,pan:panner});
+    this.active.set(source,{kind,gain:volume,pan:panner,presentation:presentation||kind==='boss-death'});
     source.onended=()=>{source.disconnect();volume.disconnect();panner.disconnect();this.active.delete(source);};
     source.start(now,offset,duration);source.stop(end+.01);
     this.last.set(kind,now);this.played[kind]=(this.played[kind]??0)+1;

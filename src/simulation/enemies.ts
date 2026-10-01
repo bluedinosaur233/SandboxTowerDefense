@@ -22,7 +22,7 @@ export const ENEMIES:Record<EnemyKind,EnemyDefinition>={
   alpha:{rank:'elite',base:'runner',scale:1.3,preference:'keep',caution:.95,name:'白鬃猎首',title:'精英 · 荒野猎群首领',description:'白鬃与赤红披肩标记着猎群首领。比普通疾行兵更强壮，双刃能迅速击倒薄弱守军，仍以突破要塞为首要目标。',counter:'用寒霜减速配合高阶兵营拦截，再由箭塔集中点杀。不要让它越过主防线。',trait:'精英 · 高速双刃 · 体型增大',hp:260,speed:1.72,damage:26,damageType:'physical',interval:.72,attackRange:.95,armor:20,resistance:20,reward:27,water:.65,castleDamage:16,color:'#d9dbce'},
   bulwark:{rank:'elite',base:'ironclad',scale:1.3,preference:'defense',caution:.05,name:'铁壁督军',title:'精英 · 重装攻城卫队',description:'铁甲卫兵的督军，披挂黑钢重甲，持厚重塔盾与钉锤。体型更宽大，优先拆毁防御建筑。',counter:'高物防但法抗很低，使用炎爆、奥术或雷电集中打击。不要只依赖箭矢和士兵硬扛。',trait:'精英 · 70% 物防 · 巨盾重甲',hp:490,speed:.69,damage:37,damageType:'physical',interval:1.2,attackRange:1.1,armor:70,resistance:10,reward:36,water:.32,castleDamage:22,color:'#687c91'},
   runecolossus:{rank:'elite',base:'runeguard',scale:1.3,preference:'keep',caution:.1,name:'紫晶巨卫',title:'精英 · 古代符文构装体',description:'由更庞大的紫晶核心驱动的符文卫士，层叠石甲与晶簇覆盖全身。它会顶着法术径直推进，用晶锤粉碎拦路守军。',counter:'75% 法抗会吸收大部分法术，优先使用鹰眼箭塔、炮塔与物理兵种。减速后集火更有效。',trait:'精英 · 75% 法抗 · 紫晶重锤',hp:560,speed:.8,damage:32,damageType:'physical',interval:1.15,attackRange:1.1,armor:20,resistance:75,reward:39,water:.4,castleDamage:24,color:'#ae7bdc'},
-  grom:{rank:'boss',base:'brute',scale:1.7,preference:'keep',caution:0,name:'格罗姆',title:'碎冠者 · 风渡破城领主',description:'披挂碎冠与黑铁战甲的兽人攻城领主。重锤蓄势时，脚下会亮起范围预警；锤击震伤附近守军并重创工事。生命低于 40% 后进入狂怒。',counter:'看到橙红预警圈后，立刻把英雄移出范围。分散防御塔，用远程火力持续削血；寒霜可以拖慢推进，但眩晕对领主持续时间减半。',trait:'首领 · 裂地重锤 · 40% 生命狂怒',hp:2200,speed:.56,damage:55,damageType:'physical',interval:1.45,attackRange:1.45,armor:35,resistance:25,reward:160,water:.38,castleDamage:65,color:'#c58b45'},
+  grom:{rank:'boss',base:'brute',scale:2.1,preference:'keep',caution:0,name:'格罗姆',title:'碎冠者 · 风渡破城领主',description:'披挂碎冠与黑铁战甲的兽人攻城领主。重锤蓄势时，脚下会亮起范围预警；锤击震伤附近守军并重创工事。生命低于 40% 后进入狂怒。',counter:'看到橙红预警圈后，立刻把英雄移出范围。分散防御塔，用远程火力持续削血；寒霜可以拖慢推进，但眩晕对领主持续时间减半。',trait:'首领 · 裂地重锤 · 40% 生命狂怒',hp:3200,speed:.60,damage:68,damageType:'physical',interval:1.35,attackRange:1.7,armor:40,resistance:30,reward:160,water:.38,castleDamage:65,color:'#c58b45'},
 
 };
 export function isEnemyKind(value:unknown):value is EnemyKind{return typeof value==='string'&&(ENEMY_KINDS as readonly string[]).includes(value);}
@@ -57,4 +57,10 @@ export function waveEnemies(wave:number,map:MapId):EnemyKind[]{
   return result;
 }
 
-export const BOSS_SLAM={radius:3.8,windup:1.6,cooldown:11,unitDamage:52,structureDamage:85,wallMultiplier:1.65} as const;
+export const BOSS_SLAM={radius:3.8,windup:1.6,cooldown:9.5,unitDamage:65,structureDamage:105,wallMultiplier:1.65} as const;
+
+/** Shared simulation / presentation timing; never tied to wall-clock time. */
+export const BOSS_ENTRANCE=4.4;
+export const BOSS_IMPACTS={hammer:.5,body:1.55,pickup:2.45,gripped:2.95,warcry:3.675} as const;
+
+export const BOSS_RAGE={duration:1.6,warcry:.45} as const;

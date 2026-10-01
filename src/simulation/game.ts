@@ -1,13 +1,14 @@
+import { buildingFootprint, footprintsOverlap } from './footprint';
 import { HERO_FX_TIMING, rainImpactTime } from './effect-timing';
 import { ECONOMY, deliveryGold, harvestGold } from './economy';
 import type { HeroId } from '../heroes/roster';
-import { soldierProfile, spellbladeAttack, SANCTUARY, BARRACKS_BRANCHES, isBarracksBranch, type BarracksBranch } from './barracks';
+import { soldierProfile, spellbladeAttack, SANCTUARY, BARRACKS_BRANCHES, BARRACKS_RECRUIT_SECONDS, barracksCapacity, isBarracksBranch, type BarracksBranch } from './barracks';
 import { HERO_STATS, HERO_ARROW, HERO_SHOT, HERO_SKILLS, type HeroSkill, type HeroEffect, type BattleHero } from './hero';
 import { canTarget } from './coverage';
 import { isDirectional } from './towers';
 import { PathQueue } from './pathfinding';
 import { TOWER_STATS, BRANCHES, isTower, towerAttack, type TowerKind, type TowerBranch, type TowerAttack, type ProjectileKind } from './towers';
-import { ENEMIES, BOSS_SLAM, waveEnemies, type EnemyKind } from './enemies';
+import { ENEMIES, BOSS_SLAM, BOSS_ENTRANCE, BOSS_RAGE, waveEnemies, type EnemyKind } from './enemies';
 import { applyDamage, damageAfterDefense, type DamageType, type Defenses } from './combat';
 export { ENEMIES, type EnemyKind } from './enemies';
 import { WIDTH, DEPTH, MAPS, makeTerrain, type MapId, type MapDefinition, type Approach, type ProductionSite } from './maps';
@@ -23,7 +24,7 @@ export interface HarvestReport { wave:number; gold:number;  sites:{id:string;nam
 export interface Resources { gold: number; }
 export interface Structure extends Point, Defenses { ruined?:boolean; id: number; kind: StructureKind; facing?:number; hp: number; maxHp: number; level: number; branch?:TowerBranch; barracksBranch?:BarracksBranch; sanctuaryCooldown?:number; cooldown: number; recruit: number }
 export type EnemyObjective={type:'keep'}|{type:'defense';id:number}|{type:'economy';id:string};
-export interface Enemy extends Vec3, Defenses { boss?:{cooldown:number;windupUntil:number;center:Vec3|null;enraged:boolean;spawnedAt:number}; id: number; kind: EnemyKind; airborne?:boolean; hp: number; maxHp: number; speed: number; damage: number; damageType: DamageType; cooldown: number; path: Point[]; revision: number; repath: number; state: 'walking' | 'attacking' | 'wading'; attackAt?:number; facing: number; objective?:EnemyObjective; decisionIn?:number; slow?:number; slowUntil?:number; stunUntil?:number; burn?:number; burnUntil?:number; shred?:number; shredUntil?:number }
+export interface Enemy extends Vec3, Defenses { boss?:{cooldown:number;windupUntil:number;center:Vec3|null;enraged:boolean;spawnedAt:number;enragedAt?:number;rageRoared?:boolean}; id: number; kind: EnemyKind; airborne?:boolean; hp: number; maxHp: number; speed: number; damage: number; damageType: DamageType; cooldown: number; path: Point[]; revision: number; repath: number; state: 'walking' | 'attacking' | 'wading'; attackAt?:number; facing: number; objective?:EnemyObjective; decisionIn?:number; slow?:number; slowUntil?:number; stunUntil?:number; burn?:number; burnUntil?:number; shred?:number; shredUntil?:number }
 export interface Soldier extends Vec3, Defenses { id: number; home: number; hp: number; maxHp: number; cooldown: number; facing: number; state: 'guarding' | 'fighting' | 'casting'; level?:number; branch?:BarracksBranch; attackAt?:number; castUntil?:number; path: Point[]; revision: number; repath: number; guard: Point; engagement?: { target: number; slot: number }; destination?: Point }
 export interface Sanctuary extends Vec3 {id:number;home:number;caster:number;time:number;duration:number;radius:number}
 export interface AttackAppearance { level:number; tint?:string; branch?:TowerBranch }
@@ -60,6 +61,8 @@ export class Game {
   readonly map: MapDefinition;
   structures: Structure[] = [];
   enemies: Enemy[] = [];
+  bossDefeats:{enemy:Enemy;time:number}[]=[];
+  heroDeaths=0;
   soldiers: Soldier[] = [];
   hero: BattleHero | null = null;
   heroEffects:HeroEffect[]=[];
@@ -134,8 +137,17 @@ export class Game {
     if (tool === 'remove' && (tile.spikes||tile.paved)) return null;
     if (tool === 'remove' && !tile.bridge) return '选择建筑或木桥拆除，返还一半资源';
     if (s) return '这里已经有建筑了';
+    if(tool!=='remove'&&this.structures.some(other=>footprintsOverlap({kind:tool,x,z},other)))return '请留出建筑占地与升级空间';
+    if(buildingFootprint(tool)>1){
+      for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){
+        const ground=this.tile(x+dx,z+dz);
+        if(!ground?.active||ground.water||ground.bridge||ground.chasm||Math.abs(ground.h-tile.h)>1)return '防御塔需要两格宽的稳固地基';
+        if(ground.spikes||ground.paved)return '请先清理塔基范围内的地面工事';
+        if(this.protected(x+dx,z+dz)||this.outposts.some(p=>Math.abs(x+dx-p.x)<=1&&Math.abs(z+dz-p.z)<=1))return '塔基不能侵占城堡、入口或生产据点';
+      }
+    }
     if(tool!=='remove'&&(tile.spikes||tile.paved))return '请先拆除地面工事';
-    if ((this.hero&&this.hero.hp>0&&Math.hypot(this.hero.x-x,this.hero.z-z)<.7) || this.enemies.some(e => !e.airborne&&Math.hypot(e.x - x, e.z - z) < 0.7) || this.soldiers.some(e => Math.hypot(e.x - x, e.z - z) < 0.7)) return '单位正占据这个位置';
+    if ((this.hero&&this.hero.hp>0&&Math.hypot(this.hero.x-x,this.hero.z-z)<buildingFootprint(tool)/2+.2) || this.enemies.some(e => !e.airborne&&Math.hypot(e.x - x, e.z - z) < buildingFootprint(tool)/2+.2) || this.soldiers.some(e => Math.hypot(e.x - x, e.z - z) < buildingFootprint(tool)/2+.2)) return '单位正占据这个位置';
     if (tool === 'remove') return null;
     if (!this.canAfford(COSTS[tool])) return '金币不足，击退敌军或完成波次可获得补给';
     if (tool === 'bridge') {
@@ -185,7 +197,9 @@ export class Game {
       tile.decoration = 0;
     } else if(tool==='spikes'){tile.spikes=true;tile.decoration=0;}
     else if(tool==='road'){tile.road=true;tile.paved=true;tile.decoration=0;}
-    else { this.addStructure(tool, x, z).facing=facing; tile.decoration = 0; }
+    else { this.addStructure(tool, x, z).facing=facing; tile.decoration = 0;
+      if(buildingFootprint(tool)>1)for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){const base=this.tile(x+dx,z+dz);if(base)base.decoration=0;}
+    }
     this.pay(COSTS[tool]); this.revision++;this.emitSound(tool==='dig'?'dig':tool==='raise'?'raise':'build',{x,z});
     this.effects.push({ id: this.nextId++, kind: 'build', x, z, y: this.ground(x, z), time: 0, duration: 0.7 });
     this.say(tool === 'dig' ? '水道已挖好 · 普通敌军涉水速度降至 38%' : tool === 'raise' ? '地势已抬高 · 高度会影响移动与真实射程' : `${LABELS[tool]}建成 · 敌军路线已重新计算`);
@@ -221,7 +235,7 @@ export class Game {
   }
   upgrade(id: number, branch?:TowerBranch|BarracksBranch): boolean {
     const s=this.structures.find(s=>s.id===id);
-    if(!s||s.level>=3||this.phase==='victory'||this.phase==='defeat')return false;
+    if(!s||(!isTower(s.kind)&&s.kind!=='barracks')||s.level>=3||this.phase==='victory'||this.phase==='defeat')return false;
     if(s.kind==='barracks'&&s.level===2){
       if(!isBarracksBranch(branch)){this.say('请选择魔剑士或圣骑士专精');this.emitSound('error',s);return false;}
     }else if(isTower(s.kind)&&s.level===2){
@@ -415,7 +429,7 @@ export class Game {
   }
   spawnEnemy(kind: EnemyKind, entrance:Point=this.spawn): Enemy {
     const stats = ENEMIES[kind], hp = Math.round(stats.hp * (1 + Math.max(0, this.wave - 1) * 0.12));
-    const enemy: Enemy = { id: this.nextId++, kind,airborne:!!stats.flying, x: entrance.x, z: entrance.z, y: this.ground(entrance.x, entrance.z) + (stats.flying?3.2:.35), hp, maxHp: hp, speed: stats.speed, damage: stats.damage, damageType:stats.damageType,armor:stats.armor,resistance:stats.resistance, cooldown: 0, path: [], revision: -1, repath: 0, state: 'walking', facing: Math.PI / 2 };
+    const enemy: Enemy = { id: this.nextId++, kind,airborne:!!stats.flying, x: entrance.x, z: entrance.z, y: this.ground(entrance.x, entrance.z) + (stats.flying?3.2:.35), hp, maxHp: hp, speed: stats.speed, damage: stats.damage, damageType:stats.damageType,armor:stats.armor,resistance:stats.resistance, cooldown: 0, path: [], revision: -1, repath: 0, state: 'walking', facing: stats.rank==='boss'?Math.atan2(this.goal.x-entrance.x,this.goal.z-entrance.z):Math.PI / 2 };
     if(stats.rank==='boss'){enemy.boss={cooldown:3,windupUntil:0,center:null,enraged:false,spawnedAt:this.time};this.emitSound('boss-arrival',entrance);this.say('首领现身：碎冠者·格罗姆！留意重锤预警，及时撤离英雄。');}
     this.enemies.push(enemy);
     if(!this.encountered.has(kind)){this.encountered.add(kind);this.encounterEvents.push(kind);}
@@ -431,14 +445,16 @@ export class Game {
   recruitSoldiers() {
     for (const b of this.structures.filter(s => s.kind === 'barracks')) {
       const own = this.soldiers.filter(s => s.home === b.id);
-      if (own.length < 2 + (b.level - 1) && b.recruit <= 0) {
+      // A full garrison cannot bank a reinforcement for an instant replacement.
+      if(own.length>=barracksCapacity(b)){b.recruit=0;continue;}
+      if (b.recruit <= 0) {
         const options = this.guardPositions(b);
         const position = options.find(p => this.tile(p.x,p.z)?.active && !this.structureAt(p.x,p.z) && !this.soldiers.some(s => s.hp>0 && (Math.hypot(s.x-p.x,s.z-p.z)<SOLDIER_SPACING || Math.hypot(s.guard.x-p.x,s.guard.z-p.z)<SOLDIER_SPACING)));
         if (!position) continue;
         const profile=soldierProfile(b);
         this.soldiers.push({level:b.level,branch:b.barracksBranch,attackAt:-100,castUntil:0, id: this.nextId++, home: b.id, guard: {...position}, ...position, y: this.ground(position.x, position.z) + 0.35, hp:profile.hp,maxHp:profile.hp,armor:profile.armor,resistance:profile.resistance, cooldown: 0, facing: -Math.PI / 2, state: 'guarding', path: [], revision: -1, repath: 0 });
         this.emitSound('recruit',b);
-        b.recruit = this.phase === 'preparation' ? 0.6 : 9;
+        b.recruit = this.phase === 'preparation' ? 0.6 : BARRACKS_RECRUIT_SECONDS;
       }
     }
   }
@@ -466,7 +482,12 @@ export class Game {
     }
     for (const s of this.soldiers) this.updateSoldier(s, dt);
     this.separateSoldiers();
-    for(const s of this.soldiers)if(s.hp<=0)this.emitSound('soldier-fall',s);
+    for(const s of this.soldiers)if(s.hp<=0){
+      this.emitSound('soldier-fall',s);
+      const home=this.structures.find(b=>b.id===s.home);
+      // Multiple casualties share the existing queue; later deaths do not restart it.
+      if(home&&home.recruit<=0)home.recruit=BARRACKS_RECRUIT_SECONDS;
+    }
     this.soldiers = this.soldiers.filter(s => s.hp > 0 && this.structures.some(b=>b.id===s.home));
     for(const tower of this.structures){
       if(!isTower(tower.kind)||tower.cooldown>0)continue;
@@ -501,6 +522,7 @@ export class Game {
     }
     this.shots = this.shots.filter(s => s.time < s.duration);
     for (const e of this.enemies.filter(e => e.hp <= 0)) {
+      if(e.boss)this.bossDefeats.push({enemy:e,time:this.time});
       this.emitSound(enemySound(e.kind,true),e);
       this.resources.gold += ENEMIES[e.kind].reward; this.kills++;
       this.effects.push({ id: this.nextId++, x: e.x, y: e.y, z: e.z, kind: 'death', time: 0, duration: 0.5 });
@@ -513,7 +535,13 @@ export class Game {
       else { this.phase = 'preparation'; this.emitSound('wave-clear'); this.resources.gold += ECONOMY.waveSupply; this.say(`第 ${this.wave} 波已击退 · 军需补给 +${ECONOMY.waveSupply} 金币${income?` · 据点收入 +${income} 金币`:""}`); }
     }
   }
+  private canMeleeReach(a:Vec3,b:Vec3 & {airborne?:boolean},range:number){
+    return !b.airborne&&Math.hypot(a.x-b.x,a.z-b.z)<=range&&Math.abs(a.y-b.y)<=.6&&this.clearAttackLine({...a,y:a.y+.5},{...b,y:b.y+.5});
+  }
   private interceptHero(h:BattleHero){
+    // Retaliation must not depend on finding an unoccupied formation slot.
+    const touching=this.phase==='battle'?this.enemies.filter(e=>e.hp>0&&this.canMeleeReach(h,e,1.25)).sort((a,b)=>distance3(h,a)-distance3(h,b))[0]:undefined;
+    if(touching){h.engagementTarget=touching.id;h.destination=null;h.path=[];h.order=null;return;}
     const candidates=this.phase==='battle'?this.enemies.filter(e=>e.hp>0&&!e.airborne&&Math.hypot(e.x-h.rally.x,e.z-h.rally.z)<3.6&&Math.abs(e.y-h.y)<1.1&&
       (e.id===h.engagementTarget||distance3(h,e)<2.8)&&!this.soldiers.some(s=>s.hp>0&&s.engagement?.target===e.id&&distance3(s,e)<.9)):[];
     candidates.sort((a,b)=>Number(b.id===h.engagementTarget)-Number(a.id===h.engagementTarget)||distance3(h,a)-distance3(h,b));
@@ -529,7 +557,7 @@ export class Game {
     }
     if(enemy&&point){
       h.engagementTarget=enemy.id;
-      if(distance3(h,enemy)<=1.15){h.destination=null;h.path=[];h.order=null;return;}
+      if(this.canMeleeReach(h,enemy,1.25)){h.destination=null;h.path=[];h.order=null;return;}
       if(!h.destination||Math.hypot(h.destination.x-point.x,h.destination.z-point.z)>.15){h.destination=point;h.repath=0;}
       h.order='intercept';return;
     }
@@ -654,6 +682,7 @@ export class Game {
   }
   private fallHero(){
     const h=this.hero;if(!h||h.state==='fallen')return;
+    this.heroDeaths++;
     h.pendingArrow=undefined;h.hp=0;h.order=null;h.engagementTarget=null;h.state='fallen';h.fallenAt=this.time;h.flying=false;h.castUntil=0;this.heroEffect('fall',h,h,1.8,1.4);h.respawnIn=HERO_STATS.respawn;h.path=[];h.destination=null;h.attackUntil=0;
     this.emitSound('hero-fall',h);this.effects.push({id:this.nextId++,x:h.x,y:h.y,z:h.z,kind:'magic',time:0,duration:1});
     this.say(`艾莉娅倒下了 · ${HERO_STATS.respawn} 秒后在城堡附近复活`);
@@ -696,7 +725,7 @@ export class Game {
       if(h.flying){this.flyHero(h,destination,dt);return;}
       if(h.revision!==this.revision||h.repath<=0){
         this.refreshPath(h,{x:Math.round(destination.x),z:Math.round(destination.z)},'goblin',true);h.repath=1;
-        if(!h.path.length&&Math.hypot(h.x-destination.x,h.z-destination.z)>.1){h.destination=null;h.order=null;h.engagementTarget=null;h.rally={x:h.x,z:h.z};h.state='idle';this.say('英雄的道路被阻断，请重新指定位置');return;}
+        if(!h.path.length&&!this.heroCanWalk(h,destination)&&Math.hypot(h.x-destination.x,h.z-destination.z)>.1){h.destination=null;h.order=null;h.engagementTarget=null;h.rally={x:h.x,z:h.z};h.state='idle';this.say('英雄的道路被阻断，请重新指定位置');return;}
       }
       // String-pull the grid route: use the furthest safely visible waypoint.
       let next=h.path[0]??destination;
@@ -710,13 +739,13 @@ export class Game {
       h.y+=(this.ground(h.x,h.z)+.35-h.y)*Math.min(1,dt*12);h.state='moving';
       if(d<=travel+.00001)h.path.shift();
       if(Math.hypot(h.x-destination.x,h.z-destination.z)<.04){h.destination=null;h.path=[];h.order=null;h.state='idle';}
-      return;
+      if(h.destination)return;
     }
     const origin={x:h.x,y:h.y+.8,z:h.z};
-    const targets=this.phase==='battle'?this.enemies.filter(e=>e.hp>0&&distance3(origin,e)<=HERO_STATS.range&&this.clearAttackLine(origin,e)):[];
+    const targets=this.phase==='battle'?this.enemies.filter(e=>e.hp>0&&(this.canMeleeReach(h,e,1.25)||(distance3(origin,e)<=HERO_STATS.range&&this.clearAttackLine(origin,e)))):[];
     targets.sort((a,b)=>distance3(h,a)-distance3(h,b));const target=targets[0];
     if(!target){if(this.time>=h.attackUntil)h.state='idle';return;}
-    const melee=!target.airborne&&distance3(h,target)<1.25;
+    const melee=this.canMeleeReach(h,target,1.25);
     if(this.time-Math.max(h.lastCombat,h.enteredAt+1.1)>=HERO_SHOT.stowAfter)h.bowReadyAt=this.time+HERO_SHOT.equip;
     h.lastCombat=this.time;h.facing=Math.atan2(target.x-h.x,target.z-h.z);
     // Retrieval finishes before a ranged attack or bow skill can start.
@@ -739,13 +768,15 @@ export class Game {
   }
   private updateBoss(e:Enemy,dt:number):boolean{
     const boss=e.boss;if(!boss)return false;
-    if(!boss.enraged&&e.hp<=e.maxHp*.4){boss.enraged=true;e.speed*=1.25;e.damage*=1.2;this.emitSound('boss-rage',e);this.say('格罗姆进入狂怒 · 重锤更频繁，移速与攻击提升！');}
+    if(this.time-boss.spawnedAt<BOSS_ENTRANCE){e.state='attacking';return true;}
+    if(!boss.enraged&&e.hp<=e.maxHp*.4){boss.enraged=true;boss.enragedAt=this.time;boss.cooldown=Math.min(boss.cooldown,2);e.speed*=1.3;e.damage*=1.3;boss.center=null;boss.windupUntil=0;this.say('格罗姆进入狂怒 · 重锤更频繁，移速与攻击提升！');}
+    if(boss.enragedAt!==undefined&&this.time-boss.enragedAt<BOSS_RAGE.duration){e.state='attacking';return true;}
     boss.cooldown-=dt;
     if(boss.center){
       e.state='attacking';
       if(this.time<boss.windupUntil)return true;
-      const center=boss.center;boss.center=null;boss.cooldown=boss.enraged?8:BOSS_SLAM.cooldown;e.attackAt=this.time;
-      const multiplier=boss.enraged?1.2:1;
+      const center=boss.center;boss.center=null;boss.cooldown=boss.enraged?6.5:BOSS_SLAM.cooldown;e.attackAt=this.time;
+      const multiplier=boss.enraged?1.3:1;
       const inside=(p:Vec3)=>Math.hypot(p.x-center.x,p.z-center.z)<=BOSS_SLAM.radius&&Math.abs(p.y-center.y)<2.8;
       for(const defender of [...this.soldiers,...(this.hero&&this.hero.hp>0?[this.hero]:[])])if(defender.hp>0&&inside(defender)){
         applyDamage(defender,BOSS_SLAM.unitDamage*multiplier*(1-this.sanctuaryProtection(defender))*(defender===this.hero&&this.hero.shieldUntil>this.time?.5:1),'physical');
@@ -788,6 +819,7 @@ export class Game {
     e.cooldown -= dt; e.repath -= dt;e.decisionIn=(e.decisionIn??0)-dt;
     const standing=this.tile(Math.round(e.x),Math.round(e.z));
     if(standing?.spikes&&!e.airborne){this.hitEnemy(e,12*dt,'physical');if(e.hp<=0)return;}
+    if(e.boss?.enragedAt!==undefined&&!e.boss.rageRoared&&this.time-e.boss.enragedAt>=BOSS_RAGE.warcry){e.boss.rageRoared=true;this.emitSound('boss-rage',e);}
     if((e.stunUntil??0)>this.time){if(e.boss?.center){e.boss.center=null;e.boss.windupUntil=0;e.boss.cooldown=4;}return;}
     if(this.updateBoss(e,dt))return;
     const stats=ENEMIES[e.kind];
@@ -801,7 +833,7 @@ export class Game {
     const hero=this.hero;
     const defenders: (Soldier|BattleHero)[]=[...this.soldiers];
     if(hero&&hero.hp>0&&(!hero.flying||stats.attackRange>=1)&&(stats.attackRange>=1||hero.blockedBy===undefined||hero.blockedBy===e.id))defenders.push(hero);
-    const defender = defenders.filter(s => s.hp > 0 && distance3(s,e)<(s===hero&&!hero.flying?Math.max(1.25,stats.attackRange):stats.attackRange) && (stats.attackRange<1||this.clearAttackLine(e,s))).sort((a,b)=>distance3(e,a)-distance3(e,b))[0];
+    const defender = defenders.filter(s => s.hp > 0 && (stats.attackRange<1?this.canMeleeReach(e,s,s===hero?1.25:stats.attackRange):distance3(s,e)<stats.attackRange&&this.clearAttackLine(e,s))).sort((a,b)=>distance3(e,a)-distance3(e,b))[0];
     if (defender) { if(defender===hero&&stats.attackRange<1)hero.blockedBy=e.id; e.state = 'attacking'; e.facing = Math.atan2(defender.x-e.x, defender.z-e.z); if (e.cooldown <= 0) { this.enemyAttack(e,defender); e.cooldown = stats.interval; } return; }
     if((e.decisionIn??0)<=0||!this.enemyTarget(e)||e.revision!==this.revision)this.chooseObjective(e);
     const target=this.enemyTarget(e)!;
@@ -864,7 +896,7 @@ export class Game {
     slots.sort((a,b)=>Number(b.slot===s.engagement?.slot&&enemy.id===s.engagement.target)-Number(a.slot===s.engagement?.slot&&enemy.id===s.engagement.target)||Math.hypot(a.p.x-s.x,a.p.z-s.z)-Math.hypot(b.p.x-s.x,b.p.z-s.z));
     for(const {slot,p} of slots){
       const end={x:Math.round(p.x),z:Math.round(p.z)},tile=this.tile(end.x,end.z);
-      if(!tile?.active||tile.chasm&&!tile.bridge||this.structureAt(end.x,end.z)||Math.hypot(MELEE_RADIUS,this.ground(p.x,p.z)+.35-enemy.y)>.86)continue;
+      if(!tile?.active||tile.chasm&&!tile.bridge||this.structureAt(end.x,end.z)||Math.hypot(MELEE_RADIUS,this.ground(p.x,p.z)+.35-enemy.y)>1.05)continue;
       if(this.soldiers.some(other=>{
         if(other===s||other.hp<=0)return false;
         const otherEnemy=this.enemies.find(e=>e.id===other.engagement?.target&&e.hp>0);
@@ -911,14 +943,16 @@ export class Game {
       }
     }
     if((s.castUntil??0)>this.time){s.state='casting';return;}
-    const nearby=this.phase==='battle'?this.enemies.filter(e=>e.hp>0&&Math.hypot(e.x-home.x,e.z-home.z)<4.8):[];
+    const nearby=this.phase==='battle'?this.enemies.filter(e=>e.hp>0&&(Math.hypot(e.x-home.x,e.z-home.z)<4.8||this.canMeleeReach(s,e,.84))):[];
     const targets=nearby.filter(e=>!e.airborne);
     targets.sort((a,b)=>Number(b.id===s.engagement?.target)-Number(a.id===s.engagement?.target)||distance3(s,a)-distance3(s,b));
-    let destination:Point|undefined,target:Enemy|undefined;
-    for(const enemy of targets){destination=this.engage(s,enemy);if(destination){target=enemy;break;}}
+    // A crowded ring, slope or stale reserved slot must never prevent retaliation.
+    let target=targets.find(e=>this.canMeleeReach(s,e,.84));
+    let destination:Point|undefined=target?{x:s.x,z:s.z}:undefined;
+    if(!target)for(const enemy of targets){destination=this.engage(s,enemy);if(destination){target=enemy;break;}}
     if(!target){s.engagement=undefined;destination=s.guard;}
     s.state='guarding';
-    if(target&&distance3(s,target)<.86){
+    if(target&&this.canMeleeReach(s,target,.84)){
       s.state='fighting';s.facing=Math.atan2(target.x-s.x,target.z-s.z);
       if(s.cooldown<=0){
         s.attackAt=this.time;this.emitSound(home.barracksBranch==='spellblade'?'spellblade-slash':home.barracksBranch==='paladin'?'paladin-sword':'soldier-sword',s);
@@ -927,6 +961,7 @@ export class Game {
         if(home.barracksBranch)this.effects.push({id:this.nextId++,kind:home.barracksBranch==='spellblade'?'enchant':'holy',x:target.x,y:target.y+.2,z:target.z,from:{x:s.x,y:s.y+.3,z:s.z},time:0,duration:.4});
         s.cooldown=profile.interval;
       }
+      s.path=[];return;
     }else if(profile.rangedDamage&&s.cooldown<=0){
       const origin={x:s.x,y:s.y+.5,z:s.z};
       const ranged=nearby.filter(e=>distance3(origin,e)<=profile.range&&this.clearAttackLine(origin,e)).sort((a,b)=>distance3(s,a)-distance3(s,b))[0];

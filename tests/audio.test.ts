@@ -56,7 +56,7 @@ test('samples load once, combat pauses, UI remains responsive and mute stops all
   audio.unlock();await audio.preloadSamples();
   assert.equal(audio.diagnostics().samplesLoaded,SOUND_FILES.length);
   assert.deepEqual(audio.diagnostics().sampleFailures,[]);
-  audio.unlock();await audio.preloadSamples();assert.equal(env.requests(),SOUND_FILES.length+1);
+  audio.unlock();await audio.preloadSamples();assert.equal(env.requests(),SOUND_FILES.length+4);
   audio.effect('arrow');audio.effect('arrow');assert.equal(audio.played.arrow,1);
   audio.effect('cast');assert.equal(audio.diagnostics().voices,2);
   audio.setSuspended(true);assert.equal(audio.diagnostics().voices,0);assert.equal(audio.music.paused,true);
@@ -77,6 +77,31 @@ test('a missing sample reports failure without preventing other sounds',async t=
   assert.match(audio.sampleStatus,/部分音效加载失败/);
   audio.effect('cast');assert.equal(audio.played.cast,undefined);
   audio.effect('arrow');assert.equal(audio.played.arrow,1);
+});
+
+test('a later gesture resumes interrupted sound without reloading samples or changing mute choices',async t=>{
+  const env=audioEnvironment(t),audio=new Audio();audio.unlock();await audio.preloadSamples();
+  const requests=env.requests();let resumed=0;
+  env.context.state='suspended';
+  t.mock.method(env.context,'resume',async()=>{resumed++;env.context.state='running';});
+  audio.retryFromGesture();await Promise.resolve();await Promise.resolve();
+  assert.equal(resumed,1);assert.equal(audio.diagnostics().context,'running');
+  assert.equal(env.requests(),requests);
+  audio.toggle();audio.toggleMusic();audio.retryFromGesture();
+  assert.equal(audio.enabled,false);assert.equal(audio.musicEnabled,false);
+});
+
+test('a blocked first gesture can be retried and network music errors are distinguished from autoplay',async t=>{
+  const env=audioEnvironment(t),audio=new Audio();env.context.state='suspended';let attempts=0;
+  t.mock.method(env.context,'resume',async()=>{if(++attempts===1)throw new Error('blocked');env.context.state='running';});
+  t.mock.method(audio.music,'play',async()=>{throw Object.assign(new Error('blocked'),{name:'NotAllowedError'});});
+  audio.retryFromGesture();await audio.preloadSamples();await Promise.resolve();
+  assert.match(audio.musicStatus,/浏览器未允许/);
+  assert.match(audio.sampleStatus,/浏览器/);
+  t.mock.method(audio.music,'play',async()=>{throw Object.assign(new Error('unavailable'),{name:'NotSupportedError'});});
+  audio.retryFromGesture();await Promise.resolve();await Promise.resolve();
+  assert.equal(env.context.state,'running');assert.match(audio.musicStatus,/加载失败/);
+  assert.equal(attempts,2);
 });
 
 
@@ -100,11 +125,38 @@ test('all six tracks are selectable and ended advances the current scene playlis
   audio.setScene('battle');audio.nextTrack();assert.ok(MUSIC_PLAYLISTS.battle.includes(audio.track));
   const valid=audio.track;audio.selectTrack(-1);audio.selectTrack(NaN);assert.equal(audio.track,valid);
 });
-test('music recordings are bundled, licensed and match their download hashes',async()=>{
+test('music recordings are credited, compact and indexed before audio data for progressive playback',async()=>{
   const dir=join(process.cwd(),'public/audio/music');const manifest=JSON.parse(await readFile(join(dir,'manifest.json'),'utf8'));
   for(const track of TRACKS){const item=manifest.find((m:any)=>m.file===track.file);assert.ok(item);assert.equal(item.license,'CC-BY-4.0');
     const bytes=await readFile(join(dir,track.file));assert.ok(bytes.length>100000);assert.equal(createHash('sha256').update(bytes).digest('hex'),item.sha256);
+    assert.ok(bytes.length<3_500_000,'each full-length track should fit the public-streaming budget');
+    assert.equal(item.originalSha256.length,64);assert.ok(item.originalFile.endsWith('.mp3'));
+    const boxes:{name:string;offset:number}[]=[];
+    for(let offset=0;offset+8<=bytes.length;){const size=bytes.readUInt32BE(offset);assert.ok(size>=8);boxes.push({name:bytes.toString('ascii',offset+4,offset+8),offset});offset+=size;}
+    const index=boxes.find(b=>b.name==='moov')!,media=boxes.find(b=>b.name==='mdat')!;
+    assert.ok(index&&media&&index.offset<media.offset);assert.ok(media.offset<100_000,'playback index must be near the beginning');
   }
+});
+
+test('current music preloads before interaction and selecting the same track does not discard its buffer',t=>{
+  audioEnvironment(t);const audio=new Audio();let reloads=0;
+  t.mock.method(audio.music,'load',()=>{reloads++;});
+  assert.equal(audio.music.preload,'auto');assert.equal(audio.unlocked,false);assert.equal(audio.music.paused,true);
+  assert.equal(audio.loadingNotice().visible,true);assert.equal(audio.loadingNotice().title,'点击启用游戏声音');
+  audio.setScene('campaign');audio.selectTrack(audio.track);assert.equal(reloads,0);
+  audio.selectTrack(1);assert.equal(reloads,1);
+});
+
+test('sound loading notice distinguishes buffering, progress, failure and readiness',async t=>{
+  audioEnvironment(t);const audio=new Audio();
+  Object.defineProperty(audio.music,'readyState',{value:0,writable:true});
+  assert.equal(audio.loadingNotice().visible,true);assert.match(audio.loadingNotice().music,/缓冲/);
+  audio.unlock();await audio.preloadSamples();
+  assert.equal(audio.loadingNotice().progress,1);assert.equal(audio.loadingNotice().visible,true,'music is still buffering');
+  Object.defineProperty(audio.music,'readyState',{value:4,writable:true});assert.equal(audio.loadingNotice().visible,false);
+  t.mock.method(audio.music,'play',async()=>{throw new Error('network');});
+  audio.selectTrack(1);await Promise.resolve();await Promise.resolve();
+  assert.equal(audio.loadingNotice().visible,true);assert.equal(audio.loadingNotice().failed,true);
 });
 
 test('tower projectiles retain distinct branch impact sounds even if upgraded in flight',async()=>{
@@ -300,4 +352,36 @@ test('judgment remains audible when normal combat voices are full while UI keeps
   env.context.currentTime+=1;audio.effect('judgment');assert.equal(audio.played.judgment,2);
   env.context.currentTime+=1;audio.effect('judgment');assert.equal(audio.played.judgment,2,'keep total voices bounded');
   audio.click();assert.equal(audio.played.click,1);assert.equal(audio.diagnostics().voices,21);
+});
+
+test('compact transports cover every cue exactly once with independent AAC files',async()=>{
+ const {default:index}=await import('../src/ui/audio-bundles.json');const seen:string[]=[];let total=0;
+ for(const bundle of index.bundles){
+  const bytes=await readFile(join(process.cwd(),'public',bundle.url));assert.equal(bytes.length,bundle.bytes);total+=bytes.length;
+  assert.ok(bundle.url.includes(createHash('sha256').update(bytes).digest('hex').slice(0,12)));
+  let offset=0;for(const entry of bundle.entries){assert.equal(entry.offset,offset);assert.ok(entry.length>100);const clip=bytes.subarray(entry.offset,entry.offset+entry.length);assert.equal(clip.toString('ascii',4,8),'ftyp');seen.push(entry.file);offset+=entry.length;}
+  assert.equal(offset,bytes.length);
+ }
+ assert.deepEqual(seen.sort(),[...SOUND_FILES].sort());assert.ok(total<700_000);assert.ok(index.bundles[0].bytes<80_000);
+});
+test('successful bundled preload downloads three payloads without requesting individual originals',async t=>{
+ audioEnvironment(t);const {default:index}=await import('../src/ui/audio-bundles.json');const urls:string[]=[];
+ t.mock.method(globalThis,'fetch',async(url:string)=>{urls.push(url);const bundle=index.bundles.find(b=>b.url===url);return {ok:!!bundle,status:bundle?200:404,arrayBuffer:async()=>{const bytes=await readFile(join(process.cwd(),'public',url));return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}};});
+ const audio=new Audio();audio.unlock();await audio.preloadSamples();
+ assert.equal(audio.diagnostics().samplesLoaded,SOUND_FILES.length);assert.deepEqual(audio.diagnostics().sampleFailures,[]);
+ assert.deepEqual(urls.filter(url=>url.endsWith('.bin')).sort(),index.bundles.map(b=>b.url).sort());assert.equal(urls.length,4);
+ audio.unlock();await audio.preloadSamples();assert.equal(urls.length,4);
+});
+test('optional licensed transport rejects foreign URLs, invalid ranges and duplicate entries',async()=>{
+ const {licensedBundle}=await import('../src/ui/audio-bundle');
+ const valid={url:'/audio/licensed/stream-123456abcdef.bin',bytes:40,entries:[{file:'licensed/a.wav',offset:0,length:40}]};
+ assert.deepEqual(licensedBundle(valid,['licensed/a.wav']),valid);
+ for(const bad of [{...valid,url:'https://example.com/a.bin'},{...valid,bytes:9_000_000},{...valid,entries:[{file:'licensed/a.wav',offset:1,length:40}]},{...valid,entries:[...valid.entries,...valid.entries]},{...valid,entries:[{file:'unknown',offset:0,length:40}]}])assert.equal(licensedBundle(bad,['licensed/a.wav']),null);
+});
+
+test('boss farewell sounds can finish through the result pause but still obey mute',async t=>{
+ const env=audioEnvironment(t),audio=new Audio();audio.unlock();await audio.preloadSamples();audio.effect('boss-death');audio.effect('arrow');
+ assert.equal(audio.diagnostics().voices,2);audio.setSuspended(true);assert.equal(audio.diagnostics().voices,1);
+ env.context.currentTime++;audio.effect('boss-body-land',0,1,true);assert.equal(audio.played['boss-body-land'],1);audio.toggle();assert.equal(audio.diagnostics().voices,0);
+ env.context.currentTime++;audio.effect('boss-body-land',0,1,true);assert.equal(audio.played['boss-body-land'],1);
 });

@@ -1,0 +1,45 @@
+/* The UI retracts only after the boss banner has completed its farewell. */
+body.result-active #app>:not(#world):not(#modal-root){pointer-events:none!important}
+body.result-hud-hidden #app>:not(#world):not(#modal-root){animation:result-hud-exit .6s cubic-bezier(.55,0,.9,.5) forwards!important;--exit-x:0px;--exit-y:-50px}
+body.result-hud-hidden #app>.build-dock{--exit-y:260px}
+body.result-hud-hidden #app>.wave-panel,body.result-hud-hidden #app>.top-actions{--exit-x:340px;--exit-y:0px}
+body.result-hud-hidden #app>.identity,body.result-hud-hidden #app>.objective,body.result-hud-hidden #app>.camera-hint{--exit-x:-360px;--exit-y:0px}
+@keyframes result-hud-exit{to{opacity:0;translate:var(--exit-x) var(--exit-y);visibility:hidden}}
+.battle-result{position:fixed;inset:0;z-index:100;display:grid;place-items:center;pointer-events:none;color:#f8dc98;font-family:Georgia,'Songti SC','STSong',serif;overflow:hidden}
+.result-veil{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,#151f1900,#111b29ad);opacity:0;transition:opacity 1s}
+.battle-result.lost .result-veil{background:radial-gradient(ellipse at 50% 45%,#26100d40,#160d18db)}
+.battle-result[data-stage=flourish] .result-veil,.battle-result[data-stage=panel] .result-veil{opacity:1}
+.result-rays{position:absolute;width:120vmax;height:120vmax;background:repeating-conic-gradient(from 0deg,#ffd77c00 0deg 12deg,#ffd77c27 14deg 20deg,#ffd77c00 24deg 36deg);mask-image:radial-gradient(circle,#000 0,transparent 65%);opacity:0;transform:rotate(0deg);pointer-events:none}
+.won[data-stage=flourish] .result-rays,.won[data-stage=panel] .result-rays{opacity:.7;animation:result-ray-turn 70s linear infinite}
+@keyframes result-ray-turn{to{transform:rotate(360deg)}}
+.result-flourish{position:absolute;text-align:center;opacity:0;filter:drop-shadow(0 6px 16px #0008)}
+.result-flourish>span{display:block;font-size:100px;line-height:1;color:#f8cc5e}.lost .result-flourish>span{color:#caa19c}
+.result-flourish h2{font-family:inherit;font-weight:900;font-size:clamp(42px,7vw,84px);letter-spacing:.16em;margin:12px 0;color:#ffe5a0;text-shadow:0 3px #71481c,0 0 30px #f6cb5777}
+.lost .result-flourish h2{color:#e7c6ba;text-shadow:0 3px #592d29,0 0 30px #ae463f88}.result-flourish p{font-size:17px;letter-spacing:.25em;margin:0}
+[data-stage=flourish] .result-flourish{animation:result-flourish 1.55s both}
+@keyframes result-flourish{0%{opacity:0;transform:scale(.65);filter:blur(9px)}23%,74%{opacity:1;transform:scale(1);filter:blur(0)}100%{opacity:0;transform:scale(1.12);filter:blur(3px)}}
+.result-motes{position:absolute;inset:0;opacity:0;pointer-events:none}[data-stage=flourish] .result-motes,[data-stage=panel] .result-motes{opacity:1}
+.result-motes i{position:absolute;left:var(--x);bottom:-10px;width:4px;height:7px;background:#f9d06f;box-shadow:0 0 8px #ffd15f;border-radius:1px;animation:result-mote 6s linear var(--delay) infinite}.lost .result-motes i{background:#a86b5a;box-shadow:0 0 5px #dc7b3944}
+@keyframes result-mote{0%{transform:translateY(0) rotate(0);opacity:0}15%,65%{opacity:.65}100%{transform:translateY(-95vh) rotate(200deg);opacity:0}}
+.settlement{position:relative;isolation:isolate;width:min(510px,95vw);height:min(680px,96dvh);pointer-events:auto;background:url('/art/ui/results/victory-frame.webp') center/100% 100% no-repeat;filter:drop-shadow(0 12px 25px #0008);animation:settlement-unfurl .7s cubic-bezier(.18,.85,.22,1) both;box-sizing:border-box}
+.settlement[hidden]{display:none}.lost .settlement{background-image:url('/art/ui/results/defeat-frame.webp')}
+@keyframes settlement-unfurl{from{opacity:0;transform:translateY(60px) scale(.84)}70%{opacity:1;transform:translateY(-6px) scale(1.015)}to{opacity:1;transform:translateY(0) scale(1)}}
+.sr-result{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.settlement-content{position:absolute;inset:27% 19% 10%;display:flex;flex-direction:column;align-items:stretch;justify-content:space-between;color:#493421;text-align:center}
+.lost .settlement-content{color:#f2dbc4}.settlement-map{margin:0;font-size:clamp(16px,2vw,23px);font-weight:700;letter-spacing:.13em;line-height:1.35}
+.settlement-stars{display:flex;justify-content:center;align-items:center;gap:3px;min-height:86px;margin:8px -10px 0}.result-star{position:relative;width:92px;max-width:33%;aspect-ratio:1;filter:drop-shadow(0 3px 2px #70502766)}.result-star:nth-child(2){align-self:flex-start;margin-top:-9px}
+.result-star>img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none}.star-empty{opacity:.26}.lost .star-empty{opacity:.5;filter:brightness(.8)}.star-gold{opacity:0;transform-origin:center}.earned .star-empty{opacity:0}.earned .star-gold{opacity:1;animation:result-star-stamp .6s cubic-bezier(.2,.8,.3,1) both}
+@keyframes result-star-stamp{0%{opacity:0;transform:translateY(-60px) scale(1.8) rotate(-20deg)}65%{opacity:1;transform:translateY(3px) scale(.92) rotate(3deg)}100%{transform:none;opacity:1}}
+.star-spark{position:absolute;inset:-15%;border:2px solid #efaf27;border-radius:50%;opacity:0;pointer-events:none}.earned .star-spark{animation:star-spark .7s both}@keyframes star-spark{15%{opacity:.8;transform:scale(.6)}100%{opacity:0;transform:scale(1.35)}}
+.star-coat{opacity:0;clip-path:inset(0 100% 0 0)}
+.plated .earned .star-coat{animation:star-plating 1.1s cubic-bezier(.2,.7,.2,1) forwards}.plated .earned:nth-child(2) .star-coat{animation-delay:.25s}.plated .earned:nth-child(3) .star-coat{animation-delay:.5s}
+.plated .earned .star-gold{animation:gold-undercoat 1.1s cubic-bezier(.2,.7,.2,1) forwards}.plated .earned:nth-child(2) .star-gold{animation-delay:.25s}.plated .earned:nth-child(3) .star-gold{animation-delay:.5s}
+@keyframes star-plating{0%{opacity:1;clip-path:inset(0 100% 0 0);filter:brightness(1.7)}70%{clip-path:inset(0);filter:brightness(1.25)}100%{opacity:1;clip-path:inset(0);filter:brightness(1)}}
+@keyframes gold-undercoat{0%{opacity:1;clip-path:inset(0)}70%,100%{opacity:1;clip-path:inset(0 0 0 100%)}}
+.result-honor{margin:5px 0 8px;min-height:18px;font-size:12px;line-height:1.5;letter-spacing:.05em;color:#75542d}.lost .result-honor{color:#cfb4a9}.plated .result-honor{color:#255b83;animation:honor-light 1s both}@keyframes honor-light{50%{text-shadow:0 0 12px #40bafa}}
+.settlement-stats{margin:0;font-size:14px;font-family:inherit}.settlement-stats>div{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #86634240;padding:9px 0}.lost .settlement-stats>div{border-color:#b9998240}.settlement-stats dt{text-align:left}.settlement-stats dd{margin:0;font-weight:800;font-size:22px;font-variant-numeric:tabular-nums}.settlement-stats small{font-size:11px;font-weight:400;opacity:.7}
+.rating-rule{font-size:10px;margin:12px -10px;line-height:1.5;opacity:.8}.settlement-buttons{display:flex;gap:10px}.settlement-buttons button{flex:1;min-height:41px;border:2px ridge #d9b46d;border-radius:4px;background:linear-gradient(#516777,#253b4b);color:#ffe3a7;box-shadow:0 2px 3px #0005,inset 0 0 0 2px #202e39;font:700 14px Georgia,'Songti SC',serif;padding:7px 3px;cursor:pointer}.settlement-buttons button:last-child{background:linear-gradient(#c99238,#8a551c);box-shadow:0 2px 3px #0005,inset 0 0 0 2px #6e461b}.lost .settlement-buttons button{background:linear-gradient(#713b33,#3d2422);border-color:#ae8171;color:#f3d3be;box-shadow:0 2px 3px #0005,inset 0 0 0 2px #321e1c}.lost .settlement-buttons button:last-child{background:linear-gradient(#505052,#303033)}.settlement-buttons button:hover{filter:brightness(1.2);transform:translateY(-1px)}.settlement-buttons button:focus-visible{outline:3px solid #54bdf8;outline-offset:4px}
+@media(max-height:620px){.settlement{width:min(440px,86vw);height:96dvh}.settlement-content{inset:26% 19% 9%}.settlement-stars{min-height:55px;margin-top:5px}.result-star{width:65px}.settlement-map{font-size:16px}.result-honor{font-size:10px;margin:2px}.settlement-stats>div{padding:4px 0}.settlement-stats dd{font-size:18px}.rating-rule{margin:5px -10px;font-size:9px}.settlement-buttons button{min-height:32px;font-size:12px}}
+@media(max-width:420px){.settlement{height:min(560px,95dvh)}.settlement-content{inset:27% 18% 10%}.settlement-stars{min-height:65px}.result-star{width:72px}.settlement-stats{font-size:12px}.settlement-stats dd{font-size:19px}.settlement-buttons{gap:6px}.settlement-buttons button{font-size:12px}}
+@media(prefers-reduced-motion:reduce){body.result-hud-hidden #app>:not(#world):not(#modal-root){animation-duration:.12s!important}.battle-result *{animation-duration:.15s!important;animation-iteration-count:1!important}.result-rays,.result-motes,.star-spark{display:none}}
+.lost .settlement-content{top:32%}

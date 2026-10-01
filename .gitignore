@@ -14,3 +14,6 @@ public/audio/licensed/
 /tests/hosting.test.ts
 /docs/HOSTING.md
 /双击开启公网试玩.command
+
+# Local visual/audio review pages.
+/audio-review.html

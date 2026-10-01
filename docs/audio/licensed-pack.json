@@ -206,6 +206,16 @@
       "license": "Mixkit Sound Effects Free License",
       "licenseUrl": "https://mixkit.co/license/#sfxFree",
       "sha256": "7e488e8542a95a459984a1f05ddbdb782cde601d37c3571d0af1a06844abec2b"
+    },
+    "mixkit-1972": {
+      "file": "mixkit-1972.wav",
+      "title": "Giant monster roar",
+      "author": "Mixkit",
+      "source": "https://mixkit.co/free-sound-effects/monster/",
+      "download": "https://assets.mixkit.co/active_storage/sfx/1972/1972.wav",
+      "license": "Mixkit Sound Effects Free License",
+      "licenseUrl": "https://mixkit.co/license/#sfxFree",
+      "sha256": "747711fcafb1d521165cd8c05b82f3d9be62339c6a7455b6418292bdb86ec747"
     }
   },
   "clips": [
@@ -519,6 +529,26 @@
           "offset": 0.012
         }
       ]
+    },
+    {
+      "id": "grom-warcry",
+      "source": "mixkit-1972",
+      "start": 0.065,
+      "duration": 2.35,
+      "rate": 0.9,
+      "lowpassHz": 4200,
+      "highpassHz": 65,
+      "attackSeconds": 0.002
+    },
+    {
+      "id": "grom-rage",
+      "source": "mixkit-1972",
+      "start": 0.14,
+      "duration": 2.1,
+      "rate": 0.97,
+      "lowpassHz": 5000,
+      "highpassHz": 70,
+      "attackSeconds": 0.002
     }
   ]
 }

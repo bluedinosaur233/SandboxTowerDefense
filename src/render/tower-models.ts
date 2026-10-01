@@ -21,6 +21,7 @@ function gem(g:THREE.Group,x:number,y:number,z:number,w:number,h:number,color:st
   b(g,x,y-h*.365,z,w,h*.15,w,color,new THREE.Euler(Math.PI,0,0),true,crystalTip);
 }
 function base(g:THREE.Group,size=1.42,color=P.stone){
+  size=Math.max(size,1.9);
   b(g,0,.07,0,size,.14,size,P.shade);
   for(let x=0;x<4;x++)for(let z=0;z<4;z++)b(g,(x-1.5)*size/4,.16,(z-1.5)*size/4,size/4-.018,.16,size/4-.018,(x+z)%3?color:P.light);
 }
@@ -78,7 +79,7 @@ function archer(g:THREE.Group,level:number,branch?:TowerBranch){
     for(let side=0;side<4;side++){const s=group(g,0,0,0,side*Math.PI/2);b(s,0,2.08,.58,1.25,.22,.095,P.oak);for(const x of [-.48,0,.48])b(s,x,2.08,.636,.04,.04,.02,P.silver);}
     for(const x of [-.46,.46])for(const z of [-.44,.44])b(g,x,2.38,z,.075,.8,.075,P.wood);
     roof(g,2.76,1.42,1.4,ranger?P.green:P.teal);
-    if(ranger){for(const x of [-.5,0,.5])crossbow(g,x,2.13,.66,.8);for(const x of [-.43,.43]){roof(group(g,x,0,.52),1.15,.55,.5,P.green);banner(g,x,.66,.54,P.green);} }
+    if(ranger){for(const x of [-.5,0,.5])crossbow(g,x,2.13,.52,.8);for(const x of [-.43,.43]){roof(group(g,x,0,.52),1.15,.55,.5,P.green);banner(g,x,.66,.54,P.green);} }
     else crossbow(g,0,2.15,.47,.8);
     // Ladder remains readable from the front and side.
     for(const x of [-.13,.13])b(g,x,.97,.57,.046,1.57,.045,P.wood);

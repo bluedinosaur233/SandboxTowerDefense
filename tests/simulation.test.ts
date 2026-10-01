@@ -122,13 +122,13 @@ function assertSoldierSpacing(g:Game){
 }
 test('a full squad keeps individual guard posts while a wave approaches',()=>{
   const g=flat(),home=g.addStructure('barracks',10,14);home.level=3;tick(g,3);
-  assert.equal(g.soldiers.length,4);
+  assert.equal(g.soldiers.length,3);
   const posts=g.soldiers.map(s=>({x:s.x,z:s.z}));
   g.phase='battle';const e=g.spawnEnemy('brute');e.speed=0;
   tick(g,12);assertSoldierSpacing(g);
   assert.deepEqual(g.soldiers.map(s=>({x:s.x,z:s.z})),posts);
 });
-test('four soldiers surround a single enemy and return to separate posts after combat',()=>{
+test('three soldiers surround a single enemy and return to separate posts after combat',()=>{
   const g=flat(),home=g.addStructure('barracks',10,14);home.level=3;tick(g,3);
   g.phase='battle';const e=g.spawnEnemy('brute');Object.assign(e,{x:7,z:15,y:HEIGHT_UNIT+.35,hp:10000,maxHp:10000,speed:0,damage:0});
   const attackers=new Set<number>();
@@ -136,17 +136,17 @@ test('four soldiers surround a single enemy and return to separate posts after c
     g.step(1/30);assertSoldierSpacing(g);
     for(const s of g.soldiers)if(s.state==='fighting')attackers.add(s.id);
   }
-  assert.equal(attackers.size,4,'every squad member can reach a melee position');
+  assert.equal(attackers.size,3,'every squad member can reach a melee position');
   assert.ok(e.hp<9500);assert.equal(e.state,'attacking');
   e.hp=0;tick(g,15);assert.equal(g.phase,'preparation');assertSoldierSpacing(g);
   for(const s of g.soldiers)assert.ok(Math.hypot(s.x-s.guard.x,s.z-s.guard.z)<.1,'soldier returns to its own guard post');
 });
 test('adjacent barracks reserve different posts and replacements reuse a vacancy',()=>{
   const g=flat(),a=g.addStructure('barracks',10,14),b=g.addStructure('barracks',10,16);a.level=3;b.level=3;
-  tick(g,4);assert.equal(g.soldiers.length,8);assertSoldierSpacing(g);
-  assert.equal(new Set(g.soldiers.map(s=>`${s.guard.x},${s.guard.z}`)).size,8);
+  tick(g,4);assert.equal(g.soldiers.length,6);assertSoldierSpacing(g);
+  assert.equal(new Set(g.soldiers.map(s=>`${s.guard.x},${s.guard.z}`)).size,6);
   const lost=g.soldiers[0];g.soldiers=g.soldiers.filter(s=>s!==lost);a.recruit=0;tick(g,1);
-  assert.equal(g.soldiers.length,8);assertSoldierSpacing(g);
+  assert.equal(g.soldiers.length,6);assertSoldierSpacing(g);
   assert.ok(g.soldiers.some(s=>s.id!==lost.id&&s.guard.x===lost.guard.x&&s.guard.z===lost.guard.z));
 });
 test('soldier avoidance stays on a narrow bridge with blocked approaches',()=>{
@@ -164,7 +164,9 @@ test('soldier avoidance stays on a narrow bridge with blocked approaches',()=>{
 test('soldiers choose a new free guard post when their original post is built over',()=>{
   const g=flat(),home=g.addStructure('barracks',10,14);home.level=3;tick(g,3);
   g.phase='battle';const e=g.spawnEnemy('brute');Object.assign(e,{x:7,z:15,y:HEIGHT_UNIT+.35,hp:10000,maxHp:10000,speed:0,damage:0});
-  tick(g,8);const old={...g.soldiers[0].guard};assert.equal(g.build('wall',old.x,old.z),true);
+  tick(g,8);const old={...g.soldiers[0].guard};
+  // Force a topology change at the post; normal construction now reserves the barracks foundation.
+  g.addStructure('wall',old.x,old.z);
   e.hp=0;tick(g,20);assertSoldierSpacing(g);
   for(const s of g.soldiers){assert.ok(Math.hypot(s.x-s.guard.x,s.z-s.guard.z)<.1);assert.ok(s.guard.x!==old.x||s.guard.z!==old.z);}
 });

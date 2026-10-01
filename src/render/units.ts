@@ -258,10 +258,42 @@ function make(kind:string,level:number,branch?:BarracksBranch){
       for(let i=0;i<3;i++)box(arms[sign===-1?0:1],(i-1)*.12,.13,.23,.044,.044,.03,'#d2af6f');}
     box(head,0,-.05,.26,.12,.08,.12,'#7f8159');box(head,0,-.14,.27,.16,.028,.035,'#35382f');
     for(const leg of [body.getObjectByName('leg-left'),body.getObjectByName('leg-right')])if(leg instanceof THREE.Group){box(leg,0,-legH*.24,.15,.25,.21,.15,'#373e3c');box(leg,0,-legH*.24,.24,.14,.12,.04,'#a18452');box(leg,0,-legH+.15,.18,.28,.25,.17,'#3b403b');}
-
+    // Layered forged plate, recessed seams and rivets stay baked into each joint.
+    for(let row=0;row<3;row++){
+      box(body,0,shoulder-.13-row*.115,.34,.61-row*.05,.095,.055,row%2?'#444c4c':'#384043');
+      box(body,0,shoulder-.17-row*.115,.375,.58-row*.05,.018,.025,'#b59a64');
+      for(const sign of [-1,1])box(body,sign*(.26-row*.02),shoulder-.12-row*.115,.38,.025,.025,.025,'#ddbb79');
+    }
+    box(body,0,shoulder-.22,.405,.14,.18,.045,'#cba25b',Math.PI/4);
+    box(body,0,shoulder-.22,.438,.065,.10,.02,'#f1bc67',Math.PI/4);
+    const cape=part(body,'boss-cape',0,shoulder,-.29);
+    for(let i=-3;i<=3;i++){
+      box(cape,i*.09,-.34,-.045-Math.abs(i)*.012,.10,.69-Math.abs(i)*.055,.045,i%2?'#6a302c':'#863d32');
+      box(cape,i*.09,-.64+Math.abs(i)*.028,-.078,.075,.035,.016,'#b08b51');
+    }
+    for(const sign of [-1,1]){
+      const arm=arms[sign<0?0:1];
+      box(arm,sign*.12,.04,.025,.27,.13,.51,'#41494a',sign*.15);
+      box(arm,sign*.15,-.03,.045,.24,.055,.52,'#b29259',sign*.15);
+      for(let i=0;i<3;i++)box(arm,0,-.17-i*.065,.11,.26,.045,.19,i%2?'#b09361':'#424b4b');
+      box(head,sign*.235,.045,-.02,.15,.10,.11,skin,sign*.32);
+      box(head,sign*.14,.16,.256,.085,.04,.018,'#f2cf87');
+      box(head,sign*.18,.275,.21,.035,.035,.02,'#edbe68');
+      for(let i=0;i<4;i++)box(arms[0],sign*.205,-.57+i*.20,.465,.027,.028,.025,'#e2c68b');
+      box(hammer,sign*.33,.55,0,.12,.34,.34,'#62665e');
+      box(hammer,sign*.4,.55,0,.035,.27,.28,'#b9a377');
+      for(let i=0;i<3;i++)box(hammer,sign*.20,.42+i*.12,.274,.027,.058,.02,'#ffce76',sign*.3);
+      for(let i=0;i<4;i++)box(hammer,0,-.10+i*.1,.05,.12,.035,.025,'#b79659');
+    }
+    // Broken crown insignia embossed on the shield.
+    box(arms[0],0,-.27,.496,.21,.09,.024,'#c4a163');
+    for(let i=-1;i<=1;i++)box(arms[0],i*.078,-.18+(i===1?-.035:0),.496,.04,.14,.024,'#dfbb73',i*.17);
+    box(head,-.05,-.025,.252,.018,.12,.02,'#b4a078',-.3);
   }
   body.scale.setScalar(definition?.scale??1);
-  finish(g);g.userData.height=new THREE.Box3().setFromObject(g).max.y+.05;return g;
+  finish(g);g.userData.height=new THREE.Box3().setFromObject(g).max.y+.05;
+  if(boss){const falling=g.getObjectByName('siege hammer')!.clone(true);falling.name='arrival-hammer';falling.visible=false;g.add(falling);}
+  return g;
 }
 export function unitModel(kind:string,level=1,branch?:BarracksBranch):THREE.Group{
   const key=kind+':'+level+':'+(branch??'');let prototype=prototypes.get(key);

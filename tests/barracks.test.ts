@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { Game } from '../src/simulation/game';
 import { BARRACKS_BRANCHES, SANCTUARY, soldierProfile, type BarracksBranch } from '../src/simulation/barracks';
 import { unitModel, animateUnit, locomotionAmount } from '../src/render/units';
-import { barracksBranchDialog } from '../src/ui/barracks';
+import { barracksBranchDialog, barracksDetails } from '../src/ui/barracks';
 import { Box3, Group, Mesh } from 'three';
 import { buildingModel } from '../src/render/world';
 import { renderSanctuaries } from '../src/render/barracks-effects';
@@ -16,6 +16,39 @@ function setup(branch?:BarracksBranch){
   return {g,b,s:g.soldiers[0]};
 }
 const near=(a:number,b:number)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
+
+test('all barracks tiers wait fifteen seconds after a casualty and share a paused reinforcement queue',()=>{
+  for(const tier of [1,2,'spellblade','paladin'] as const){
+    const {g,b}=setup(typeof tier==='string'?tier:undefined);
+    if(tier===2)assert.ok(g.upgrade(b.id));
+    const capacity=tier===1?2:3;
+    for(let i=0;i<5;i++){b.recruit=0;g.recruitSoldiers();}
+    assert.equal(g.soldiers.length,capacity);
+    const enemy=g.spawnEnemy('goblin',{x:2,z:2});enemy.speed=0;enemy.damage=0;g.phase='battle';
+    const tick=(seconds:number)=>{for(let i=0;i<Math.round(seconds*30);i++)g.step(1/30);};
+    tick(30);g.soldiers[0].hp=0;tick(1/30);
+    assert.equal(g.soldiers.length,capacity-1);near(b.recruit,15);
+    g.paused=true;g.step(30);near(b.recruit,15);g.paused=false;
+    tick(5);g.soldiers[0].hp=0;tick(1/30);
+    assert.equal(g.soldiers.length,capacity-2);assert.ok(b.recruit<10,'another casualty must not restart the queue');
+    tick(9.8);assert.equal(g.soldiers.length,capacity-2,'no early replacement');
+    tick(.3);assert.equal(g.soldiers.length,capacity-1);
+    tick(14.7);assert.equal(g.soldiers.length,capacity-1);
+    tick(.4);assert.equal(g.soldiers.length,capacity);
+    tick(20);assert.equal(g.soldiers.length,capacity);
+  }
+});
+
+test('barracks panels show the actual three-person branch cap and recruitment interval',()=>{
+  for(const branch of ['spellblade','paladin'] as const){
+    const {b}=setup(branch),html=barracksDetails(b);
+    assert.match(html,/驻军编制<\/span><b>3 名/);
+    assert.match(html,/战中补员间隔<\/span><b>15 秒 \/ 人/);
+  }
+  const dialog=barracksBranchDialog(1000);
+  assert.equal((dialog.match(/编制 \/ 每人生命<\/dt><dd>3 人/g)??[]).length,2);
+  assert.doesNotMatch(dialog,/训练 4 名/);
+});
 
 test('barracks upgrades are atomic and retrain survivors; reinforcements inherit either branch',()=>{
   for(const branch of Object.keys(BARRACKS_BRANCHES) as BarracksBranch[]){
@@ -31,7 +64,7 @@ test('barracks upgrades are atomic and retrain survivors; reinforcements inherit
     assert.equal(b.barracksBranch,branch);assert.equal(s.branch,branch);near(s.hp/s.maxHp,.4);
     assert.equal(s.maxHp,soldierProfile(b).hp);
     for(let i=0;i<5;i++){b.recruit=0;g.recruitSoldiers();}
-    assert.equal(g.soldiers.length,4);assert.ok(g.soldiers.every(u=>u.branch===branch&&u.armor===soldierProfile(b).armor));
+    assert.equal(g.soldiers.length,3);assert.ok(g.soldiers.every(u=>u.branch===branch&&u.armor===soldierProfile(b).armor));
     assert.equal(g.upgrade(b.id,branch==='paladin'?'spellblade':'paladin'),false);
   }
 });
@@ -112,4 +145,13 @@ test('troop tiers and branches have distinct geometry, clone poses independently
   renderSanctuaries(one,[field],()=>1,0);renderSanctuaries(two,[field],()=>1,.1);
   assert.equal((one.children[0] as Mesh).geometry,(two.children[0] as Mesh).geometry);
   assert.equal((one.children[0] as Mesh).material,(two.children[0] as Mesh).material);
+});
+
+test('soldiers retaliate on a slope even when no old narrow melee slot fits',()=>{
+  const {g,b,s}=setup();g.soldiers=[s];g.phase='battle';
+  Object.assign(s,{x:10,z:10,y:g.ground(10,10)+.35,guard:{x:10,z:10}});
+  g.tile(9,10)!.h=2;
+  const e=g.spawnEnemy('goblin',{x:9.3,z:10});Object.assign(e,{speed:0,hp:1000,maxHp:1000,damage:1});
+  for(let i=0;i<60;i++)g.step(1/30);
+  assert.ok(e.hp<1000-soldierProfile(b).physical,'the soldier attacks repeatedly without waiting for a formation slot');
 });

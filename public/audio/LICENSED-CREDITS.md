@@ -49,3 +49,11 @@ Later hero revision: the release returns to the bundled original `swing-2.wav`. 
 ### 2026-09-30 · 雷罚尖塔
 
 `judgment-strike.wav` 使用本表 Mixkit 2599 “Heavy electric shockwave impact” 的 3.81 秒起始段，叠加 Mixkit 2600 “Electricity static power up” 的放电段，经过剪辑、滤波、轻微调速与淡入淡出。原文件 SHA-256、逐层参数见 `docs/audio/licensed-pack.json`。增益为 0.58，继续使用游戏的响度校准与峰值限制。
+
+## Boss entrance and war cries — 2026-10-01
+
+| Source | Author | License | Runtime clips |
+| --- | --- | --- | --- |
+| [Giant monster roar](https://mixkit.co/free-sound-effects/monster/) | Mixkit | Mixkit Sound Effects Free License | `grom-warcry.wav`, `grom-rage.wav` |
+
+The source was downloaded from Mixkit item 1972. Two local clips trim the roar to a short attack, add a tiny fade, and normalize it for the Boss entrance and rage events. The source download remains in the ignored local audio workspace; the clips are only used as part of the game build.
