@@ -18,6 +18,7 @@ try {
   await page.goto('about:blank');
   console.log(JSON.stringify({chromeLaunch:'passed',version:browser.version()}));
   await page.goto('http://127.0.0.1:5173/',{waitUntil:'networkidle'});
+  await page.getByRole('button',{name:'进入大陆',exact:true}).click({timeout:180000});
   await page.waitForFunction(()=>window.__riverwatch?.world.renderer.info.render.calls>0);
   await page.screenshot({path:'.playwright/desktop.png'});
   checks.push('WebGL scene boots and renders');

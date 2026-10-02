@@ -1,8 +1,7 @@
 import { BattleResult } from './ui/result';
 import './ui/result.css';
 import { ECONOMY, deliveryGold, streakGold } from './simulation/economy';
-import { AudioLoadingNotice } from './ui/audio-loading';
-import './ui/audio-loading.css';
+import { audio } from './ui/runtime-audio';
 import { BossHud, bossInPlan } from './ui/boss';
 import { BossEntrance } from './render/boss-entrance';
 import './ui/boss.css';
@@ -24,7 +23,7 @@ import { WIDTH, DEPTH, type MapId } from './simulation/maps';
 import { World } from './render/world';
 import { icon } from './ui/icons';
 import { portrait } from './ui/portraits';
-import { Audio, TRACKS } from './ui/audio';
+import { TRACKS } from './ui/audio';
 import { ENEMIES, TARGET_LABELS, type EnemyKind } from './simulation/enemies';
 import { DAMAGE_LABELS, type Defenses } from './simulation/combat';
 import { BestiaryPanel } from './bestiary/panel';
@@ -68,8 +67,6 @@ let aiming:number|null=null,aimFacing=0;
 let heroCommand=false;
 let tool:Tool='inspect',selected:number|null=null,hover:Point|null=null,lastMessage=-1,toastTimer=0,modalOpen=false,modalWasPaused=false,lastPhase=game.phase,dirtySelection='';
 let selectedPost:string|null=null;
-const audio=new Audio();
-const audioLoading=new AudioLoadingNotice(app,audio);
 const bossHud=new BossHud(app);
 let audioPanelOpen=false;
 const el=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
@@ -346,10 +343,10 @@ function updateMapChrome(){
 
 function closeModal(){el('modal-root').innerHTML='';modalOpen=false;game.paused=modalWasPaused;world.controls.enabled=true;audio.unlock();}
 function revealBattleHud(){updateUI(performance.now());updateHealthBars();hudEntry.play();}
-function startMap(mapId:MapId){audioLoading.enterBattle();battleResult.cancel();bossEntrance.finish();hudEntry.cancel();closeAudio();campaign.hide();hasBattle=true;keys.clear();accumulator=0;game=new Game(true,mapId,campaign.heroFor(mapId));bestiary.beginBattle();world.setGame(game);world.resetCamera();lastPhase=game.phase;selected=null;modalWasPaused=false;closeModal();updateMapChrome();selectTool('inspect');lastMessage=-1;audio.click();if(!travel.active)revealBattleHud();}
+function startMap(mapId:MapId){battleResult.cancel();bossEntrance.finish();hudEntry.cancel();closeAudio();campaign.hide();hasBattle=true;keys.clear();accumulator=0;game=new Game(true,mapId,campaign.heroFor(mapId));bestiary.beginBattle();world.setGame(game);world.resetCamera();lastPhase=game.phase;selected=null;modalWasPaused=false;closeModal();updateMapChrome();selectTool('inspect');lastMessage=-1;audio.click();if(!travel.active)revealBattleHud();}
 function showMapPicker(){
   if(campaign.visible)return;
-  audioLoading.enterCampaign();battleResult.cancel();hudEntry.cancel();
+  battleResult.cancel();hudEntry.cancel();
   selectTool('inspect');campaignWasPaused=game.paused;game.paused=true;world.controls.enabled=false;keys.clear();
   el('modal-root').innerHTML='';modalOpen=false;closeAudio();
   campaign.show(hasBattle&&game.phase!=='victory'&&game.phase!=='defeat');
@@ -372,7 +369,7 @@ function showResult(){
 }
 
 const keys=new Set<string>();
-window.addEventListener('keydown',e=>{if(battleResult.presenting){e.preventDefault();return;}if(bossEntrance.active){e.preventDefault();if(e.code==='Escape')bossEntrance.finish();else if(e.code==='Space')game.paused=!game.paused;return;}if(travel.active){e.preventDefault();return;}if(bestiary.open)return;if(e.target instanceof HTMLInputElement)return;if(campaign.visible){if(campaign.heroPanel.open)return;if(e.code==='Escape'&&campaign.selected){campaign.clearSelection();return;}if(e.code==='Escape'&&hasBattle&&game.phase!=='victory'&&game.phase!=='defeat')resumeBattle();return;}if(['Space','Enter','ArrowUp','ArrowDown'].includes(e.code))e.preventDefault();if(e.repeat){if(['KeyW','KeyA','KeyS','KeyD'].includes(e.code))keys.add(e.code);return;}if(e.code==='Escape'){if(modalOpen&&game.phase!=='victory'&&game.phase!=='defeat')closeModal();else{selected=null;selectedPost=null;world.select(null);selectTool('inspect');}return;}if(modalOpen){if(e.code==='Tab'){const dialog=document.querySelector('#modal-root [role=dialog]');if(dialog){const buttons=[...dialog.querySelectorAll<HTMLElement>('button:not(:disabled), a[href]')];const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}}return;}keys.add(e.code);audio.unlock();if(e.code==='Space')togglePause();else if(e.code==='Enter'){if(aiming!==null){game.orientStructure(aiming,aimFacing);aiming=null;world.setAim(null);syncPlacement();}else if(placement.point)clickPlacement(placement.point);else if(tool==='inspect')startWave();}else if((e.code==='KeyQ'||e.code==='KeyE')&&(aiming!==null||isDirectional({kind:tool})||selectedDirectional())){rotatePreview(e.code==='KeyQ'?TURN_COUNTERCLOCKWISE:TURN_CLOCKWISE);}else if(/^Digit[0-9]$/.test(e.code)){const next=buildShortcut(buildGroup,e.code);if(next)selectTool(next);}else if(e.code==='KeyH')selectHero();else if(e.code==='KeyX')selectTool('remove');else if(e.code==='KeyR')world.resetCamera();});
+window.addEventListener('keydown',e=>{if(document.body.classList.contains('startup-pending'))return;if(battleResult.presenting){e.preventDefault();return;}if(bossEntrance.active){e.preventDefault();if(e.code==='Escape')bossEntrance.finish();else if(e.code==='Space')game.paused=!game.paused;return;}if(travel.active){e.preventDefault();return;}if(bestiary.open)return;if(e.target instanceof HTMLInputElement)return;if(campaign.visible){if(campaign.heroPanel.open)return;if(e.code==='Escape'&&campaign.selected){campaign.clearSelection();return;}if(e.code==='Escape'&&hasBattle&&game.phase!=='victory'&&game.phase!=='defeat')resumeBattle();return;}if(['Space','Enter','ArrowUp','ArrowDown'].includes(e.code))e.preventDefault();if(e.repeat){if(['KeyW','KeyA','KeyS','KeyD'].includes(e.code))keys.add(e.code);return;}if(e.code==='Escape'){if(modalOpen&&game.phase!=='victory'&&game.phase!=='defeat')closeModal();else{selected=null;selectedPost=null;world.select(null);selectTool('inspect');}return;}if(modalOpen){if(e.code==='Tab'){const dialog=document.querySelector('#modal-root [role=dialog]');if(dialog){const buttons=[...dialog.querySelectorAll<HTMLElement>('button:not(:disabled), a[href]')];const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}}return;}keys.add(e.code);audio.unlock();if(e.code==='Space')togglePause();else if(e.code==='Enter'){if(aiming!==null){game.orientStructure(aiming,aimFacing);aiming=null;world.setAim(null);syncPlacement();}else if(placement.point)clickPlacement(placement.point);else if(tool==='inspect')startWave();}else if((e.code==='KeyQ'||e.code==='KeyE')&&(aiming!==null||isDirectional({kind:tool})||selectedDirectional())){rotatePreview(e.code==='KeyQ'?TURN_COUNTERCLOCKWISE:TURN_CLOCKWISE);}else if(/^Digit[0-9]$/.test(e.code)){const next=buildShortcut(buildGroup,e.code);if(next)selectTool(next);}else if(e.code==='KeyH')selectHero();else if(e.code==='KeyX')selectTool('remove');else if(e.code==='KeyR')world.resetCamera();});
 // Touch browsers may grant activation only on release; retries also recover
 // interrupted audio and samples that timed out on a slow public connection.
 for(const event of ['pointerdown','touchend','click','keydown'])
@@ -446,7 +443,7 @@ function updateHealthBars(){
   for(const [id,element] of healthElements)if(!visible.has(id)){element.remove();healthElements.delete(id);}
 }
 let previous=performance.now(),accumulator=0,lastUI=0;
-function frame(now:number){const dt=Math.min((now-previous)/1000,0.08);previous=now;audio.update(dt);audioLoading.update(dt);if(audioPanelOpen&&now-lastUI>100){updateAudioPanel();lastUI=now;}if(travel.active){travel.render(now/1000);audio.setSuspended(true);accumulator=0;requestAnimationFrame(frame);return;}if(campaign.visible){campaign.render(now/1000);audio.setSuspended(true);requestAnimationFrame(frame);return;}audio.setScene('battle');audio.setSuspended(game.paused||modalOpen);
+function frame(now:number){const dt=Math.min((now-previous)/1000,0.08);previous=now;audio.update(dt);if(audioPanelOpen&&now-lastUI>100){updateAudioPanel();lastUI=now;}if(travel.active){travel.render(now/1000);audio.setSuspended(true);accumulator=0;requestAnimationFrame(frame);return;}if(campaign.visible){campaign.render(now/1000);audio.setSuspended(true);requestAnimationFrame(frame);return;}audio.setScene('battle');audio.setSuspended(game.paused||modalOpen);
   if(battleResult.active){audio.setSuspended(true);battleResult.update(dt);world.render(now/1000);bossHud.update(game,true,game.time+world.terminalTime);accumulator=0;requestAnimationFrame(frame);return;}
   if(bossEntrance.active){bossEntrance.update(dt);world.render(now/1000);requestAnimationFrame(frame);return;}
   accumulator+=dt*game.speed;

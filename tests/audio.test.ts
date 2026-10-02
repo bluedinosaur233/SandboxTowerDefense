@@ -385,3 +385,61 @@ test('boss farewell sounds can finish through the result pause but still obey mu
  env.context.currentTime++;audio.effect('boss-body-land',0,1,true);assert.equal(audio.played['boss-body-land'],1);audio.toggle();assert.equal(audio.diagnostics().voices,0);
  env.context.currentTime++;audio.effect('boss-body-land',0,1,true);assert.equal(audio.played['boss-body-land'],1);
 });
+
+test('startup fully loads music and decodes muted sounds before entry; switching tracks needs no download',async t=>{
+  const env=audioEnvironment(t);env.context.state='suspended';
+  const original=globalThis.fetch;let musicRequests=0;
+  t.mock.method(globalThis,'fetch',async(input:any,init?:any)=>{
+    if(String(input).endsWith('.m4a')){musicRequests++;return new Response(new Blob(['complete track'],{type:'audio/mp4'}));}
+    return original(input,init);
+  });
+  const audio=new Audio({deferMusic:true});audio.enabled=false;audio.musicEnabled=false;
+  await audio.preloadAll();
+  assert.equal(audio.unlocked,false);assert.equal(env.context.state,'suspended');
+  assert.equal(audio.diagnostics().samplesLoaded,SOUND_FILES.length);
+  assert.equal(audio.diagnostics().musicFilesLoaded,TRACKS.length);
+  assert.match(audio.music.src,/^blob:/);
+  const requests=env.requests();await audio.preloadAll();
+  for(let i=0;i<TRACKS.length;i++){audio.selectTrack(i);assert.match(audio.music.src,/^blob:/);}
+  assert.equal(musicRequests,TRACKS.length);assert.equal(env.requests(),requests);
+});
+
+test('startup rejects incomplete sound downloads and retries only failed tracks',async t=>{
+  audioEnvironment(t);const original=globalThis.fetch;let fail=true;
+  const requests=new Map<string,number>();
+  t.mock.method(globalThis,'fetch',async(input:any,init?:any)=>{
+    const url=String(input);
+    if(url.endsWith('.m4a')){
+      requests.set(url,(requests.get(url)??0)+1);
+      return fail&&url.endsWith(TRACKS[2].file)?new Response('',{status:503}):new Response(new Blob(['track']));
+    }
+    return original(input,init);
+  });
+  const audio=new Audio({deferMusic:true});await assert.rejects(audio.preloadAll(),/声音未能加载/);
+  assert.equal(audio.diagnostics().musicFilesLoaded,TRACKS.length-1);
+  fail=false;await audio.preloadAll();assert.equal(audio.diagnostics().musicFilesLoaded,TRACKS.length);
+  TRACKS.forEach((track,i)=>assert.equal(requests.get('/audio/music/'+track.file),i===2?2:1));
+});
+
+test('startup accepts an absent optional pack on SPA hosting but blocks a missing required sound',async t=>{
+  audioEnvironment(t,'energy-cast.wav');const original=globalThis.fetch;
+  t.mock.method(globalThis,'fetch',async(input:any,init?:any)=>{
+    if(String(input).endsWith('pack.json'))return new Response('<html>SPA fallback</html>',{headers:{'content-type':'text/html'}});
+    if(String(input).endsWith('.m4a'))return new Response(new Blob(['track']));
+    return original(input,init);
+  });
+  const audio=new Audio({deferMusic:true});await assert.rejects(audio.preloadAll(),/声音未能加载/);
+  assert.deepEqual(audio.diagnostics().sampleFailures,['energy-cast.wav']);
+});
+
+test('source-only startup completes with bundled sounds when the optional manifest returns an HTML fallback',async t=>{
+  audioEnvironment(t);const original=globalThis.fetch;
+  t.mock.method(globalThis,'fetch',async(input:any,init?:any)=>{
+    if(String(input).endsWith('pack.json'))return new Response('<html>SPA fallback</html>',{headers:{'content-type':'text/html'}});
+    if(String(input).endsWith('.m4a'))return new Response(new Blob(['track']));
+    return original(input,init);
+  });
+  const audio=new Audio({deferMusic:true});await audio.preloadAll();
+  assert.equal(audio.diagnostics().licensedSamples,0);
+  assert.equal(audio.diagnostics().samplesLoaded,SOUND_FILES.length);
+});

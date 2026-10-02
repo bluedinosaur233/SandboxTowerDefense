@@ -48,16 +48,17 @@ export class Audio {
   private musicRequest=0;
   private musicPending=false;
   private musicFailed=false;
+  private musicFiles=new Map<number,string>();
   private get musicAllowed(){return this.scene==='campaign'||!this.suspended;}
   update(dt:number){this.fade=Math.min(1,this.fade+Math.max(0,dt)/1.2);this.music.volume=this.musicVolume*this.fade;}
 
-  constructor(){
+  constructor(options:{deferMusic?:boolean}={}){
     try {
       const saved=JSON.parse(localStorage.getItem('riverwatch-audio-v2')||'{}');
       this.enabled=saved.enabled??true; this.musicEnabled=saved.musicEnabled??true;
       this.musicVolume=saved.musicVolume??.32; this.sfxVolume=saved.sfxVolume??.65; this.track=Number.isInteger(saved.track)&&saved.track>=0&&saved.track<TRACKS.length?saved.track:0;
     } catch {}
-    this.music.preload=this.musicEnabled?'auto':'none';this.music.loop=false;this.music.src='/audio/music/'+TRACKS[this.track].file;this.music.volume=this.musicVolume;
+    this.music.preload=options.deferMusic?'none':this.musicEnabled?'auto':'none';this.music.loop=false;if(!options.deferMusic)this.music.src='/audio/music/'+TRACKS[this.track].file;this.music.volume=this.musicVolume;
     void this.downloadBundle(bundledAudio.bundles[0]).catch(()=>{});
     this.music.addEventListener('ended',()=>this.nextTrack());
     this.music.addEventListener('playing',()=>{this.musicFailed=false;this.musicStatus='正在演奏';});
@@ -68,15 +69,18 @@ export class Audio {
   private save(){
     try{localStorage.setItem('riverwatch-audio-v2',JSON.stringify({enabled:this.enabled,musicEnabled:this.musicEnabled,musicVolume:this.musicVolume,sfxVolume:this.sfxVolume,track:this.track}));}catch{}
   }
-  unlock(){
+  private prepareContext(){
     if(!this.context){
       this.context=new AudioContext({latencyHint:'interactive'});this.master=this.context.createGain();this.compressor=this.context.createDynamicsCompressor();
       this.compressor.threshold.value=-16;this.compressor.ratio.value=4;this.compressor.attack.value=.005;this.compressor.release.value=.12;
       this.master.connect(this.compressor).connect(this.context.destination);this.master.gain.value=this.enabled?this.sfxVolume:0;
     }
-    if(this.context.state!=='running'&&!this.resumePending){
+  }
+  unlock(){
+    this.prepareContext();
+    if(this.context!.state!=='running'&&!this.resumePending){
       this.resumePending=true;
-      void this.context.resume().then(()=>{
+      void this.context!.resume().then(()=>{
         if(this.context?.state!=='running')this.sampleStatus='浏览器暂停了声音 · 请点击页面重试';
         else if(this.ready)this.sampleStatus=this.packFiles.some(file=>this.buffers.has(file))?'Pixabay / Mixkit 音效已就绪':'本地采样音效已就绪';
       }).catch(()=>{this.sampleStatus='浏览器未允许播放声音 · 请点击页面重试';})
@@ -86,12 +90,41 @@ export class Audio {
     if(this.musicEnabled&&this.music.paused&&this.musicAllowed)this.playMusic();
     void this.preloadSamples();
   }
+  /** Decode while suspended: downloading does not require an autoplay gesture. */
+  async preloadAll(progress:(done:number,total:number)=>void=()=>{}){
+    this.prepareContext();this.lastLoad=-Infinity;
+    const report=()=>progress(this.buffers.size+this.musicFiles.size,SOUND_FILES.length+this.packFiles.length+TRACKS.length);
+    const timer=setInterval(report,100);report();
+    try{
+      const pending=TRACKS.map((_,i)=>i).filter(i=>!this.musicFiles.has(i));
+      const music=Promise.all(Array.from({length:2},async()=>{
+        const failures:string[]=[];
+        while(pending.length){
+          const index=pending.shift()!,abort=new AbortController(),timeout=setTimeout(()=>abort.abort(),120000);
+          try{
+            const response=await fetch('/audio/music/'+TRACKS[index].file,{signal:abort.signal});
+            if(!response.ok)throw new Error('Music HTTP '+response.status);
+            const blob=await response.blob();if(!blob.size)throw new Error('Empty music');
+            this.musicFiles.set(index,URL.createObjectURL(blob));report();
+          }catch{failures.push(TRACKS[index].title);}finally{clearTimeout(timeout);}
+        }
+        return failures;
+      }));
+      const [,failed]=await Promise.all([this.preloadSamples(),music]);
+      if(!this.ready||failed.flat().length)throw new Error('部分声音未能加载，请检查网络后重试。');
+      // Blob URLs hold the complete tracks: changing scene or song never streams again.
+      this.music.preload='auto';this.music.src=this.musicFiles.get(this.track)!;this.music.load();report();
+    }finally{clearInterval(timer);}
+  }
   private async discoverPack(){
     if(this.packChecked)return;
     const abort=new AbortController(),timeout=setTimeout(()=>abort.abort(),4000);
     try{
       const response=await fetch('/audio/licensed/pack.json',{signal:abort.signal});
-      if(response.ok){const pack=await response.json();this.packFiles=licensedFiles(pack);this.packBundle=licensedBundle(pack.streamBundle,this.packFiles);}
+      // SPA hosts may return index.html for an absent optional pack.
+      const absent=(!response.ok&&response.status===404)||response.headers?.get('content-type')?.includes('text/html');
+      if(response.ok&&!absent){const pack=await response.json();this.packFiles=licensedFiles(pack);this.packBundle=licensedBundle(pack.streamBundle,this.packFiles);}
+      else if(!absent)throw new Error('Audio pack HTTP '+response.status);
       this.packChecked=true;
     }catch{/* Offline/source-only installs keep the bundled sounds; retry on the next unlock. */}
     finally{clearTimeout(timeout);}
@@ -209,7 +242,7 @@ export class Audio {
     this.sceneTracks[this.scene]=index;
     if(this.track===index)return;
     this.track=index;this.musicRequest++;this.musicPending=false;this.musicFailed=false;
-    this.music.preload=this.musicEnabled?'auto':'none';this.music.src='/audio/music/'+TRACKS[this.track].file;this.music.load();this.fade=0;this.music.volume=0;
+    this.music.preload=this.musicEnabled?'auto':'none';this.music.src=this.musicFiles.get(this.track)??'/audio/music/'+TRACKS[this.track].file;this.music.load();this.fade=0;this.music.volume=0;
     if(this.unlocked&&this.musicEnabled&&this.musicAllowed)this.playMusic();
     else if(!this.musicAllowed){this.music.pause();this.musicStatus='游戏暂停中';}
     this.save();
@@ -270,5 +303,5 @@ export class Audio {
       this.effect(e.kind,ui?0:Math.max(-.8,Math.min(.8,(dx*right.x+dz*right.z)/18)),ui?1:Math.max(.16,1-Math.hypot(dx,dz)/48));
     }
   }
-  diagnostics(){return {mode:'samples',unlocked:this.unlocked,context:this.context?.state,voices:this.active.size,played:this.played,samplesLoaded:this.buffers.size,samplesTotal:SOUND_FILES.length+this.packFiles.length,licensedSamples:this.packFiles.filter(file=>this.buffers.has(file)).length,sampleFailures:[...this.failures],musicReady:this.music.readyState,musicPaused:this.music.paused,musicTime:this.music.currentTime,scene:this.scene,track:TRACKS[this.track].title};}
+  diagnostics(){return {mode:'samples',unlocked:this.unlocked,context:this.context?.state,voices:this.active.size,played:this.played,samplesLoaded:this.buffers.size,samplesTotal:SOUND_FILES.length+this.packFiles.length,licensedSamples:this.packFiles.filter(file=>this.buffers.has(file)).length,sampleFailures:[...this.failures],musicReady:this.music.readyState,musicPaused:this.music.paused,musicTime:this.music.currentTime,musicFilesLoaded:this.musicFiles.size,scene:this.scene,track:TRACKS[this.track].title};}
 }
